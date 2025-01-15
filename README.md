@@ -1,5 +1,7 @@
 # mio
 
+![status](https://github.com/maxtek6/mio/actions/workflows/test.yml/badge.svg)
+
 This is a fork of the original [repo](https://github.com/vimpunk/mio), which is not actively maintained.
 
 An easy to use header-only cross-platform C++11 memory mapping library with an MIT license.
