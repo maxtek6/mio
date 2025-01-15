@@ -1,4 +1,7 @@
 # mio
+
+This is a fork of the original [repo](https://github.com/vimpunk/mio), which is not actively maintained.
+
 An easy to use header-only cross-platform C++11 memory mapping library with an MIT license.
 
 mio has been created with the goal to be easily includable (i.e. no dependencies) in any C++ project that needs memory mapped file IO without the need to pull in Boost.
