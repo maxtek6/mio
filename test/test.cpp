@@ -35,8 +35,8 @@ int main()
     // Make sure mio compiles with non-const char* strings too.
     const char _path[] = "test-file";
     const int path_len = sizeof(_path);
-    char* path = new char[path_len];
-    std::copy(_path, _path + path_len, path);
+    char path[path_len];
+    std::copy(_path, _path + path_len, &path[0]);
 
     const auto page_size = mio::page_size();
     // Fill buffer, then write it to file.
