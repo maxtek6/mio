@@ -1,6 +1,7 @@
 # mio
 
-![status](https://github.com/maxtek6/mio/actions/workflows/test.yml/badge.svg)
+[![MIO Test Pipeline](https://github.com/wissem01chiha/mio/actions/workflows/test.yml/badge.svg)](https://github.com/wissem01chiha/mio/actions/workflows/test.yml)
+[![MIO Docs Pipeline](https://github.com/wissem01chiha/mio/actions/workflows/doc.yml/badge.svg)](https://github.com/wissem01chiha/mio/actions/workflows/doc.yml)
 
 This is a fork of the original [repo](https://github.com/vimpunk/mio), which is not actively maintained.
 
@@ -21,7 +22,7 @@ Albeit a minor nitpick, Boost.Iostreams implements memory mapped file IO with a 
 In mio, there are two classes to cover the two use-cases: one that is move-only (basically a zero-cost abstraction over the system specific mmapping functions), and the other that acts just like its Boost.Iostreams counterpart, with shared semantics.
 
 ### How to create a mapping
-NOTE: the file must exist before creating a mapping.
+>> Note :  the file must exist before creating a mapping.
 
 There are three ways to map a file into memory:
 
