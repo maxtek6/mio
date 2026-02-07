@@ -1,0 +1,5 @@
+[submodule "third_party/amalgamate"]
+	path   = third_party/amalgamate
+	url    = https://github.com/edlund/amalgamate
+	branch = master
+

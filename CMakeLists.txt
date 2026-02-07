@@ -56,6 +56,16 @@ CMAKE_DEPENDENT_OPTION(mio.tests
    ON "BUILD_TESTING; NOT subproject" OFF)
 
 #
+# The `mio.docs` only appear as cmake-gui and ccmake options if 
+# mio is the highest level project. In the case that mio is a subproject, these
+# options are hidden from the user interface and set to `OFF`
+#
+CMAKE_DEPENDENT_OPTION(mio.docs
+  "Build the mio doxygen documentation"
+   OFF "NOT subproject" OFF)
+mark_as_advanced(mio.docs)
+
+#
 # On Windows, so as to be a "good citizen", mio offers two mechanisms to control
 # the imported surface area of the Windows API. The default `mio` target sets
 # the necessary flags for a minimal Win API (`WIN32_LEAN_AND_MEAN`, etc.) on
@@ -86,6 +96,7 @@ CMAKE_DEPENDENT_OPTION(mio.installation
   "Include mio in the install set"
   "${INSTALL_SUBPROJECTS}" "subproject" ON)
 mark_as_advanced(mio.installation)
+
 
 #
 # mio has no compiled components. As such, we declare it as an `INTERFACE`
@@ -147,6 +158,10 @@ add_subdirectory(include/mio)
 
 if(mio.tests)
   add_subdirectory(test)
+endif()
+ 
+if(mio.docs)
+  add_subdirectory(docs)
 endif()
 
 if(mio.installation)

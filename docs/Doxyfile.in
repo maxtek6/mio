@@ -1,0 +1,77 @@
+#---------------------------------------------------------------------------
+# Project related configuration options
+#---------------------------------------------------------------------------
+DOXYFILE_ENCODING       = UTF-8
+PROJECT_NAME            = @PROJECT_NAME@
+PROJECT_NUMBER          = @PROJECT_VERSION@
+PROJECT_BRIEF           = 
+PROJECT_LOGO            =  
+PROJECT_ICON            =  
+OUTPUT_DIRECTORY        = @CMAKE_CUREENT_BINARY_DIR@
+OUTPUT_LANGUAGE         = English
+MARKDOWN_SUPPORT        = YES
+CREATE_SUBDIRS          = NO
+ALWAYS_DETAILED_SEC     = YES
+REPEAT_BRIEF            = YES
+ABBREVIATE_BRIEF        =
+ALLOW_UNICODE_NAMES     = NO
+SHOW_NAMESPACES         = YES
+SEARCHENGINE            = YES
+RTF_HYPERLINKS          = YES
+FULL_SIDEBAR            = YES
+GENERATE_TREEVIEW       = NO
+TREEVIEW_WIDTH          = 250
+ENUM_VALUES_PER_LINE   = 1 # Default: 4
+HTML_COLORSTYLE         = 
+LAYOUT_FILE             = @CMAKE_CURRENT_SOURCE_DIR@/layouts/DoxygenLayout.xml
+HTML_HEADER             = @CMAKE_CURRENT_SOURCE_DIR@/styles/custom_header.html
+HTML_FOOTER             = @CMAKE_CURRENT_SOURCE_DIR@/styles/custom_footer.html
+HTML_EXTRA_STYLESHEET   = @CMAKE_CURRENT_SOURCE_DIR@/styles/extra_stylesheet.css
+HTML_INDEX_NUM_ENTRIES  = 100
+HTML_DYNAMIC_SECTIONS   = YES
+DISABLE_INDEX           = NO
+HTML_FILE_EXTENSION    = .html
+
+#---------------------------------------------------------------------------
+# Build related configuration options
+#---------------------------------------------------------------------------
+EXTRACT_ALL             = YES
+RECURSIVE               = YES
+GENERATE_HTML           = YES
+GENERATE_LATEX          = NO
+
+#---------------------------------------------------------------------------
+# Configuration options related to the input files
+#---------------------------------------------------------------------------
+INPUT                  =    @CMAKE_SOURCE_DIR@/src \  
+                            @CMAKE_SOURCE_DIR@/include \
+                            @CMAKE_SOURCE_DIR@/README.md
+
+INPUT_ENCODING         = UTF-8
+FILE_PATTERNS          = *.c \
+                         *.cc \
+                         *.cpp \
+                         *.h \
+                         *.hpp \
+                         *.md \
+                         *.txt
+#---------------------------------------------------------------------------
+# configuration options for main page of the documentation
+#---------------------------------------------------------------------------
+USE_MDFILE_AS_MAINPAGE = @CMAKE_SOURCE_DIR@/README.md
+HAVE_DOT             = NO
+DOT_IMAGE_FORMAT     = svg
+DOT_GRAPH_MAX_NODES  = 100
+CLASS_GRAPH          = YES
+COLLABORATION_GRAPH  = YES
+HIDE_UNDOC_RELATIONS = NO
+TEMPLATE_RELATIONS   = YES
+INCLUDE_GRAPH        = YES
+INCLUDED_BY_GRAPH    = YES
+CLASS_DIAGRAMS       = YES
+GENERATE_LEGEND      = YES
+GRAPHICAL_HIERARCHY  = YES        
+MAX_DOT_GRAPH_DEPTH  = 40
+USE_MATHJAX          = NO
+GENERATE_BUGLIST     = YES
+SHOW_INCLUDE_FILES   = NO
