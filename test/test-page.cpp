@@ -1,6 +1,6 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
-#include <mio/page.hpp>
+#include "mio.hpp"
 
 TEST_CASE("page_size stablilty cross calls") {
     size_t ps1 = mio::page_size();

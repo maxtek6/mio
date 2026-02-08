@@ -1,8 +1,4 @@
-
-
-#include <mio/mmap.hpp>
-#include <mio/shared_mmap.hpp>
-
+#include "mio.hpp"
 #include <string>
 #include <fstream>
 #include <cstdlib>
