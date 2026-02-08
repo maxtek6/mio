@@ -1,7 +1,6 @@
 set(mio_test_sources
-  test-mio.cpp
-  test-mmap.cpp
-  test-page.cpp
+  test_mmap_source.cpp
+  test_page_size.cpp
 )
 
 enable_testing()
@@ -22,18 +21,21 @@ foreach(src IN LISTS mio_test_sources)
 endforeach()
 
 if(WIN32)
-  set(MIO_WIN_TEST_SRC test-mio.cpp)
+  set(MIO_WIN_TEST_SRC test_mmap_source.cpp)
 
   add_executable(mio.unicode.test ${MIO_WIN_TEST_SRC})
+  target_include_directories(mio.unicode.test PRIVATE ${CMAKE_SOURCE_DIR}/third_party)
   target_link_libraries(mio.unicode.test PRIVATE mio::mio)
   target_compile_definitions(mio.unicode.test PRIVATE UNICODE)
   add_test(NAME mio.unicode.test COMMAND mio.unicode.test)
 
   add_executable(mio.fullwinapi.test ${MIO_WIN_TEST_SRC})
+  target_include_directories(mio.fullwinapi.test PRIVATE ${CMAKE_SOURCE_DIR}/third_party)
   target_link_libraries(mio.fullwinapi.test PRIVATE mio::mio_full_winapi)
   add_test(NAME mio.fullwinapi.test COMMAND mio.fullwinapi.test)
 
   add_executable(mio.minwinapi.test ${MIO_WIN_TEST_SRC})
+  target_include_directories(mio.minwinapi.test PRIVATE ${CMAKE_SOURCE_DIR}/third_party)
   target_link_libraries(mio.minwinapi.test PRIVATE mio::mio_min_winapi)
   add_test(NAME mio.minwinapi.test COMMAND mio.minwinapi.test)
 endif()

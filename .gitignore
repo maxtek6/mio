@@ -42,6 +42,7 @@
 build/
 Build/
 build-*/
+.vs/
 
 # CMake generated files
 CMakeFiles/
