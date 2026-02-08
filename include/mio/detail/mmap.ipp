@@ -40,8 +40,8 @@
  * SOFTWARE.
  */
 
-#ifndef MIO_BASIC_MMAP_IMPL
-#define MIO_BASIC_MMAP_IMPL
+#ifndef MIO_BASIC_MMAP_IPP
+#define MIO_BASIC_MMAP_IPP
 
 #include "mio/page.hpp"
 #include "mio/detail/string_util.hpp"
@@ -551,4 +551,4 @@ bool operator>=(const basic_mmap<AccessMode, ByteT>& a,
 
 } // namespace mio
 
-#endif // MIO_BASIC_MMAP_IMPL
+#endif // MIO_BASIC_MMAP_IPP

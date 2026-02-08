@@ -163,7 +163,18 @@ add_library(mio-headers INTERFACE)
 add_library(mio::mio-headers ALIAS mio-headers)
 target_link_libraries(mio-headers INTERFACE mio)
 
-add_subdirectory(include/mio)
+#
+# While not strictly necessary to specify header files as target sources,
+# doing so populates these files in the source listing when CMake is used
+# to generate XCode and Visual Studio projects.
+#
+target_sources(mio-headers INTERFACE
+  "${prefix}/mio/mmap.hpp"
+  "${prefix}/mio/page.hpp"
+  "${prefix}/mio/shared_mmap.hpp"
+  "${prefix}/mio/detail/mmap.ipp"
+  "${prefix}/mio/detail/string_util.hpp"
+)
 
 if(mio.tests)
   add_subdirectory(test)

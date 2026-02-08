@@ -40,8 +40,8 @@
  * SOFTWARE.
  */
 
-#ifndef MIO_SHARED_MMAP_HEADER
-#define MIO_SHARED_MMAP_HEADER
+#ifndef MIO_SHARED_MMAP_HPP
+#define MIO_SHARED_MMAP_HPP
 
 #include "mio/mmap.hpp"
 
@@ -425,4 +425,4 @@ using shared_ummap_sink = basic_shared_mmap_sink<unsigned char>;
 
 } // namespace mio
 
-#endif // MIO_SHARED_MMAP_HEADER
+#endif // MIO_SHARED_MMAP_HPP

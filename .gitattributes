@@ -1,3 +1,4 @@
+tools/** linguist-vendored
 third_party/** linguist-vendored
 docs/styles/** linguist-vendored
 docs/layouts/** linguist-vendored

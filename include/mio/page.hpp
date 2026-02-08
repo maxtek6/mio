@@ -40,8 +40,8 @@
  * SOFTWARE.
  */
 
-#ifndef MIO_PAGE_HEADER
-#define MIO_PAGE_HEADER
+#ifndef MIO_PAGE_HPP
+#define MIO_PAGE_HPP
 
 #ifdef _WIN32
 #include <windows.h>
@@ -63,7 +63,6 @@ enum class access_mode
 
 /**
  * Determines the operating system's page allocation granularity.
- *
  * On the first call to this function, it invokes the operating system specific syscall
  * to determine the page size, caches the value, and returns it. Any subsequent call to
  * this function serves the cached value, so no further syscalls are made.
@@ -95,6 +94,6 @@ inline size_t make_offset_page_aligned(size_t offset) noexcept
     return offset / page_size_ * page_size_;
 }
 
-} // namespace mio
+}; // namespace mio
 
-#endif // MIO_PAGE_HEADER
+#endif // MIO_PAGE_HPP

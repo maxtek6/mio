@@ -40,8 +40,8 @@
  * SOFTWARE.
  */
 
-#ifndef MIO_STRING_UTIL_HEADER
-#define MIO_STRING_UTIL_HEADER
+#ifndef MIO_STRING_UTIL_HPP
+#define MIO_STRING_UTIL_HPP
 
 #include <type_traits>
 
@@ -189,4 +189,4 @@ template<
 } // namespace detail
 } // namespace mio
 
-#endif // MIO_STRING_UTIL_HEADER
+#endif // MIO_STRING_UTIL_HPP

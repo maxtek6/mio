@@ -40,8 +40,8 @@
  * SOFTWARE.
  */
 
-#ifndef MIO_MMAP_HEADER
-#define MIO_MMAP_HEADER
+#ifndef MIO_MMAP_HPP
+#define MIO_MMAP_HPP
 
 #include "mio/page.hpp"
 
@@ -511,4 +511,4 @@ mmap_sink make_mmap_sink(const MappingToken& token, std::error_code& error)
 
 #include "detail/mmap.ipp"
 
-#endif // MIO_MMAP_HEADER
+#endif // MIO_MMAP_HPP
