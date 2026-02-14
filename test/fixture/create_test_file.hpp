@@ -26,15 +26,15 @@
 #include <string>
 #include <fstream>
 
-
 static std::string create_test_file(const std::string& path, size_t size) {
     std::string buffer(size, 0);
-    char v = 33;
-    for (auto& b : buffer) {
+    char        v = 33;
+    for(auto& b : buffer) {
         b = v;
         ++v;
         v %= 126;
-        if (v == 0) v = 33;
+        if(v == 0)
+            v = 33;
     }
     std::ofstream file(path);
     file << buffer;

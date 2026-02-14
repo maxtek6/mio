@@ -20,10 +20,19 @@
  * SOFTWARE.
  */
 
-#ifndef MIO_TEST_FIXTURE_FIXTURE_HPP
-#define MIO_TEST_FIXTURE_FIXTURE_HPP
+#ifndef MIO_TEST_FIXTURE_PRINT_BENCHMARK_RESULT
+#define MIO_TEST_FIXTURE_PRINT_BENCHMARK_RESULT
 
-#include "create_test_file.hpp"
-#include "print_benchmark_result.hpp"
+#include <iomanip>
+#include <iostream>
+#include <string>
 
-#endif // MIO_TEST_FIXTURE_FIXTURE_HPP
+inline void print_benchmark_result(const std::string& label, long ms, size_t size) {
+    double throughput = (size / (1024.0 * 1024.0)) / (ms / 1000.0);
+
+    std::cout << std::left << std::setw(25) << label << ": " << std::right << std::setw(8) << ms
+              << " ms"
+              << "   (" << std::fixed << std::setprecision(1) << throughput << " MB/s)" << '\n';
+}
+
+#endif // MIO_TEST_FIXTURE_PRINT_BENCHMARK_RESULT

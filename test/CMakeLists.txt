@@ -1,6 +1,11 @@
 set(mio_test_sources
-  test_mmap_source.cpp
+  test_mmap.cpp
   test_page_size.cpp
+  test_shared_mmap.cpp
+)
+
+set(mio_benchmark_sources 
+  benchmark_mmap.cpp
 )
 
 enable_testing()
@@ -21,7 +26,7 @@ foreach(src IN LISTS mio_test_sources)
 endforeach()
 
 if(WIN32)
-  set(MIO_WIN_TEST_SRC test_mmap_source.cpp)
+  set(MIO_WIN_TEST_SRC test_mmap.cpp)
 
   add_executable(mio.unicode.test ${MIO_WIN_TEST_SRC})
   target_include_directories(mio.unicode.test PRIVATE ${CMAKE_SOURCE_DIR}/third_party)
@@ -38,4 +43,13 @@ if(WIN32)
   target_include_directories(mio.minwinapi.test PRIVATE ${CMAKE_SOURCE_DIR}/third_party)
   target_link_libraries(mio.minwinapi.test PRIVATE mio::mio_min_winapi)
   add_test(NAME mio.minwinapi.test COMMAND mio.minwinapi.test)
+endif()
+
+if(mio.benchmark)
+  foreach(src IN LISTS mio_benchmark_sources)
+    get_filename_component(exe ${src} NAME_WE)
+    add_executable(${exe} ${src})
+    target_include_directories(${exe} PRIVATE ${prefix})
+    target_link_libraries(${exe} PRIVATE mio::mio)
+  endforeach()
 endif()

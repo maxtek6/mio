@@ -55,6 +55,17 @@ CMAKE_DEPENDENT_OPTION(mio.tests
   "Build the mio tests and integrate with ctest"
    ON "BUILD_TESTING; NOT subproject" OFF)
 
+
+#
+# The `mio.benchmark` options only appear as cmake-gui and ccmake options iff
+# mio is the highest level project. In the case that mio is a subproject, these
+# options are hidden from the user interface and set to `OFF`
+#
+CMAKE_DEPENDENT_OPTION(mio.benchmark
+  "Build the mio benchmarking suite"
+  ON "BUILD_TESTING; NOT subproject" OFF)
+
+  
 #
 # The `mio.docs` only appear as cmake-gui and ccmake options if 
 # mio is the highest level project. In the case that mio is a subproject, these
@@ -72,7 +83,7 @@ mark_as_advanced(mio.docs)
 #
 CMAKE_DEPENDENT_OPTION(mio.examples
   "Build the mio examples scripts"
-   OFF "NOT subproject" OFF)
+   ON "NOT subproject" OFF)
 
 #
 # On Windows, so as to be a "good citizen", mio offers two mechanisms to control

@@ -9,4 +9,13 @@
 ::
 :: Licensed under the MIT License. See the LICENSE file.
 :: -------------------------------------------------------------
+@echo off
+SETLOCAL enableDelayedExpansion
 
+WHERE ctest.exe > NUL 2>&1
+IF %ERRORLEVEL% NEQ 0 (
+  ECHO ctest.exe not found.
+  EXIT /B 1
+)
+
+ctest -C Debug --output-on-failure

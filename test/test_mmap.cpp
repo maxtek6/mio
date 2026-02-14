@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include "mio.hpp"
-#include "fixture/create_test_file.hpp"
+#include "fixture/fixture.hpp"
 
 TEST_CASE("mmap maps entire file") {
     std::error_code ec;

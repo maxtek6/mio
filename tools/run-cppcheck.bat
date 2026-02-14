@@ -10,16 +10,25 @@
 :: Licensed under the MIT License. See the LICENSE file.
 :: -------------------------------------------------------------
 @echo off
-cppcheck --enable=all ^
+SETLOCAL enableDelayedExpansion
+
+WHERE cppcheck.exe > NUL 2>&1
+IF %ERRORLEVEL% NEQ 0 (
+  ECHO cppcheck.exe not found.
+  EXIT /B 1
+)
+
+cppcheck ^
+    --enable=all ^
     --inconclusive ^
     --std=c++11 ^
     --suppress=missingIncludeSystem ^
     --suppress=missingInclude ^
-  ./include/mio.hpp ^
-  ./include/mio/mmap.hpp ^
-  ./include/mio/page.hpp ^
-  ./include/mio/shared_mmap.hpp ^
-  ./include/mio/detail/mmap.ipp ^
-  ./include/mio/detail/string_util.hpp
-
-
+    --enable=style ^
+    --enable=performance ^
+    --suppress=missingSystemInclude ^
+    --suppress=unmatchedSuppression ^
+    --error-exitcode=1 ^
+    --inline-suppr ^
+    ./include/** ^
+    ./example/*.cpp

@@ -53,11 +53,11 @@
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
-#endif 
+#endif
 #include <windows.h>
-#else 
+#else
 #define INVALID_HANDLE_VALUE -1
-#endif 
+#endif
 
 namespace mio {
 
@@ -130,7 +130,8 @@ public:
      * any operation that attempts to access nonexistent underlying data will
      * result in undefined behaviour/segmentation faults.
      */
-    basic_mmap() = default;
+    basic_mmap()
+            : is_handle_internal_(true) {};
 
 #ifdef __cpp_exceptions
     /**
@@ -139,8 +140,8 @@ public:
      * thrown.
      */
     template <typename String>
-    basic_mmap(const String& path, const size_type offset = 0,
-               const size_type length = map_entire_file) {
+    explicit basic_mmap(const String& path, const size_type& offset = 0,
+                        const size_type& length = map_entire_file) {
         std::error_code error;
         map(path, offset, length, error);
         if(error) {
@@ -153,8 +154,8 @@ public:
      * while establishing the mapping is wrapped in a `std::system_error` and is
      * thrown.
      */
-    basic_mmap(const handle_type handle, const size_type offset = 0,
-               const size_type length = map_entire_file) {
+    explicit basic_mmap(const handle_type& handle, const size_type& offset = 0,
+                        const size_type& length = map_entire_file) {
         std::error_code error;
         map(handle, offset, length, error);
         if(error) {
@@ -277,8 +278,8 @@ public:
      * by `data`). If this is invoked when no valid memory mapping has been created
      * prior to this call, undefined behaviour ensues.
      */
-    reference       operator[](const size_type i) noexcept { return data_[i]; }
-    const_reference operator[](const size_type i) const noexcept { return data_[i]; }
+    reference       operator[](const size_type& i) noexcept { return data_[i]; }
+    const_reference operator[](const size_type& i) const noexcept { return data_[i]; }
 
     /**
      * Establishes a memory mapping with AccessMode. If the mapping is unsuccesful, the
@@ -301,7 +302,7 @@ public:
      * case a mapping of the entire file is created.
      */
     template <typename String>
-    void map(const String& path, const size_type offset, const size_type length,
+    void map(const String& path, const size_type& offset, const size_type& length,
              std::error_code& error);
 
     /**
@@ -340,7 +341,7 @@ public:
      * `length` is the number of bytes to map. It may be `map_entire_file`, in which
      * case a mapping of the entire file is created.
      */
-    void map(const handle_type handle, const size_type offset, const size_type length,
+    void map(const handle_type& handle, const size_type& offset, const size_type& length,
              std::error_code& error);
 
     /**
@@ -354,7 +355,7 @@ public:
      * 
      * The entire file is mapped.
      */
-    void map(const handle_type handle, std::error_code& error) {
+    void map(const handle_type& handle, std::error_code& error) {
         map(handle, 0, map_entire_file, error);
     }
 
@@ -396,10 +397,13 @@ private:
      * if it's `read`, but since the destructor cannot be templated, we need to
      * do SFINAE in a dedicated function, where one syncs and the other is a noop.
      */
+
     template <access_mode A = AccessMode>
-    typename std::enable_if<A == access_mode::write, void>::type conditional_sync();
+    typename std::enable_if<A == access_mode::write, void>::type
+    conditional_sync(); // cppcheck-suppress functionStatic
     template <access_mode A = AccessMode>
-    typename std::enable_if<A == access_mode::read, void>::type conditional_sync();
+    typename std::enable_if<A == access_mode::read, void>::type
+    conditional_sync(); // cppcheck-suppress functionStatic
 };
 
 template <access_mode AccessMode, typename ByteT>
@@ -491,7 +495,7 @@ mmap_sink make_mmap_sink(const MappingToken& token, std::error_code& error) {
     return make_mmap_sink(token, 0, map_entire_file, error);
 }
 
-} // namespace mio
+}; // namespace mio
 
 #include "detail/mmap.ipp"
 

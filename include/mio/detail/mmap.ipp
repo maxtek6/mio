@@ -320,8 +320,8 @@ basic_mmap<AccessMode, ByteT>::mapping_handle() const noexcept
 
 template<access_mode AccessMode, typename ByteT>
 template<typename String>
-void basic_mmap<AccessMode, ByteT>::map(const String& path, const size_type offset,
-        const size_type length, std::error_code& error)
+void basic_mmap<AccessMode, ByteT>::map(const String& path, const size_type& offset,
+        const size_type& length, std::error_code& error)
 {
     error.clear();
     if(detail::empty(path))
@@ -344,8 +344,8 @@ void basic_mmap<AccessMode, ByteT>::map(const String& path, const size_type offs
 }
 
 template<access_mode AccessMode, typename ByteT>
-void basic_mmap<AccessMode, ByteT>::map(const handle_type handle,
-        const size_type offset, const size_type length, std::error_code& error)
+void basic_mmap<AccessMode, ByteT>::map(const handle_type& handle,
+        const size_type& offset, const size_type& length, std::error_code& error)
 {
     error.clear();
     if(handle == invalid_handle)
