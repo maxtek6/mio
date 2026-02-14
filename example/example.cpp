@@ -69,7 +69,9 @@ int main() {
 
     // Or manually iterate through the mapped region just as if it were any other
     // container, and change each byte's value (since this is a read-write mapping).
-    std::transform(rw_mmap.begin(), rw_mmap.end(), rw_mmap.begin(), [](auto b) { return b + 10; });
+    for (auto& b : rw_mmap) {
+        b += 10;
+    }
 
     // Or just change one value with the subscript operator.
     const int answer_index = rw_mmap.size() / 2;
