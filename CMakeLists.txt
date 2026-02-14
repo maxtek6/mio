@@ -80,7 +80,7 @@ CMAKE_DEPENDENT_OPTION(mio.benchmark
 #
 CMAKE_DEPENDENT_OPTION(mio.docs
   "Build the mio doxygen documentation"
-   ON "NOT subproject" OFF)
+   OFF "NOT subproject" OFF)
 mark_as_advanced(mio.docs)
 
 #
@@ -231,7 +231,7 @@ if(mio.installation)
     FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc
     DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
   )
-  
+
   #
   # As a header-only library, there are no target components to be installed
   # directly (the PUBLIC_HEADER property is not white listed for INTERFACE
