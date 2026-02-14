@@ -69,7 +69,7 @@ int main() {
 
     // Or manually iterate through the mapped region just as if it were any other
     // container, and change each byte's value (since this is a read-write mapping).
-    for (auto& b : rw_mmap) {
+    for(auto& b : rw_mmap) {
         b += 10;
     }
 

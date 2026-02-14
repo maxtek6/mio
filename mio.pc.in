@@ -1,11 +1,8 @@
-prefix=@prefix@
-libdir=@libdir@
-includedir=@prefix@
+prefix=@CMAKE_INSTALL_PREFIX@
+includedir=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_INCLUDEDIR@/@PROJECT_NAME@
 
-Name: mio
-Version: @PACKAGE_VERSION@
-Description: Cross-platform C++11 header-only library for memory mapped file IO.
-URL: https://github.com/mandreyel/mio
-
-Libs: -L${libdir} @LIBS@
-Cflags: -I${includedir}
+Name: @PROJECT_NAME@
+Description: @PROJECT_DESCRIPTION@
+URL: @PROJECT_HOMEPAGE_URL@
+Version: @PROJECT_VERSION@
+Cflags: -I"${includedir}"

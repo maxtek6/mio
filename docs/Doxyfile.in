@@ -19,14 +19,14 @@ SHOW_NAMESPACES         = YES
 SEARCHENGINE            = YES
 RTF_HYPERLINKS          = YES
 FULL_SIDEBAR            = YES
-GENERATE_TREEVIEW       = NO
+GENERATE_TREEVIEW       = YES
 TREEVIEW_WIDTH          = 250
-ENUM_VALUES_PER_LINE   = 1 # Default: 4
+ENUM_VALUES_PER_LINE   = 1  
 HTML_COLORSTYLE         = 
-LAYOUT_FILE             = @CMAKE_CURRENT_SOURCE_DIR@/layouts/DoxygenLayout.xml
-HTML_HEADER             = @CMAKE_CURRENT_SOURCE_DIR@/styles/custom_header.html
-HTML_FOOTER             = @CMAKE_CURRENT_SOURCE_DIR@/styles/custom_footer.html
-HTML_EXTRA_STYLESHEET   = @CMAKE_CURRENT_SOURCE_DIR@/styles/extra_stylesheet.css
+LAYOUT_FILE             = 
+HTML_HEADER             = 
+HTML_FOOTER             = 
+HTML_EXTRA_STYLESHEET   = @CMAKE_CURRENT_SOURCE_DIR@/styles/doxygen-awesome.css
 HTML_INDEX_NUM_ENTRIES  = 100
 HTML_DYNAMIC_SECTIONS   = YES
 DISABLE_INDEX           = NO
@@ -39,6 +39,8 @@ EXTRACT_ALL             = YES
 RECURSIVE               = YES
 GENERATE_HTML           = YES
 GENERATE_LATEX          = NO
+GENERATE_TODOLIST      = YES
+GENERATE_DEPRECATEDLIST= YES
 
 #---------------------------------------------------------------------------
 # Configuration options related to the input files

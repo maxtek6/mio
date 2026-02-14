@@ -18,7 +18,14 @@ else()
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
 
-project(mio VERSION 1.1.0 LANGUAGES C CXX)
+project(
+  mio
+  VERSION 1.1.0
+  DESCRIPTION "A lightweight C++ library for memory-mapped file I/O"
+  HOMEPAGE_URL "https://github.com/mandreyel/mio"
+  LANGUAGES C CXX
+)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(CMakeDependentOption)
 include(CMakePackageConfigHelpers)
@@ -65,7 +72,7 @@ CMAKE_DEPENDENT_OPTION(mio.benchmark
   "Build the mio benchmarking suite"
   ON "BUILD_TESTING; NOT subproject" OFF)
 
-  
+
 #
 # The `mio.docs` only appear as cmake-gui and ccmake options if 
 # mio is the highest level project. In the case that mio is a subproject, these
@@ -73,7 +80,7 @@ CMAKE_DEPENDENT_OPTION(mio.benchmark
 #
 CMAKE_DEPENDENT_OPTION(mio.docs
   "Build the mio doxygen documentation"
-   OFF "NOT subproject" OFF)
+   ON "NOT subproject" OFF)
 mark_as_advanced(mio.docs)
 
 #
@@ -200,6 +207,17 @@ if(mio.examples)
 endif()
 
 if(mio.installation)
+
+  #
+  # Generate package config '*.pc' file from vendored template
+  # for mio librray 
+  #
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc
+    @ONLY
+  )
+
   #
   # Non-testing header files (preserving relative paths) are installed to the
   # `include` subdirectory of the `$INSTALL_DIR/${CMAKE_INSTALL_PREFIX}`
@@ -209,6 +227,11 @@ if(mio.installation)
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
     FILES_MATCHING PATTERN "*.*pp")
 
+  install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
+  )
+  
   #
   # As a header-only library, there are no target components to be installed
   # directly (the PUBLIC_HEADER property is not white listed for INTERFACE

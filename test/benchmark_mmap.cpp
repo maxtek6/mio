@@ -1,8 +1,9 @@
-
-// File sizes: 1MB, 5MB, 10MB, 100MB, 200MB
-// Benchmark: sequential read using memory mapping
-// Benchmark: sequential write using memory mapping
-// benkacl between chuned write of 64 KB
+// Benchmarks for I/O operations using the mio library
+// File sizes tested: 1MB, 5MB, 10MB, 100MB, 200MB
+// Benchmark: sequential read with memory mapping
+// Benchmark: sequential write with memory mapping
+// Benchmark: chunked write with 64 KB blocks
+/// @todo Add Boost.Iostreams benchmarks
 
 #include "mio/mmap.hpp"
 #include "fixture/fixture.hpp"

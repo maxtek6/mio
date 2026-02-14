@@ -1,17 +1,17 @@
+<!-- omit in toc -->
 # mio
 
 [![MIO Test Pipeline](https://github.com/wissem01chiha/mio/actions/workflows/test.yml/badge.svg)](https://github.com/wissem01chiha/mio/actions/workflows/test.yml)
 [![MIO Docs Pipeline](https://github.com/wissem01chiha/mio/actions/workflows/doc.yml/badge.svg)](https://github.com/wissem01chiha/mio/actions/workflows/doc.yml)
 
-- [mio](#mio)
-    - [Why?](#why)
-    - [How to create a mapping](#how-to-create-a-mapping)
-    - [Example](#example)
-    - [Single Header File](#single-header-file)
-  - [CMake](#cmake)
-    - [Testing](#testing)
-    - [Installation](#installation)
-    - [Subproject Composition](#subproject-composition)
+- [Why?](#why)
+  - [How to create a mapping](#how-to-create-a-mapping)
+  - [Example](#example)
+  - [Single Header File](#single-header-file)
+- [CMake](#cmake)
+  - [Testing](#testing)
+  - [Installation](#installation)
+  - [Subproject Composition](#subproject-composition)
 
 This is a fork of the original [repo](https://github.com/vimpunk/mio), which is not actively maintained.
 
@@ -21,7 +21,7 @@ mio has been created with the goal to be easily includable (i.e. no dependencies
 
 Please feel free to open an issue, I'll try to address any concerns as best I can.
 
-### Why?
+## Why?
 
 Because memory mapping is the best thing since sliced bread!
 
