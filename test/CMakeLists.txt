@@ -70,6 +70,6 @@ if(mio.cover)
       DEPENDS ${COVER_TARGETS})
     add_custom_command(
       TARGET cover
-      COMMAND gcovr -r ${CMAKE_CURRENT_SOURCE_DIR}/.. -e ${CMAKE_CURRENT_SOURCE_DIR} -e '${CMAKE_CURRENT_SOURCE_DIR}/../third_party/.*')
+      COMMAND gcovr -r ${CMAKE_CURRENT_SOURCE_DIR}/.. -e ${CMAKE_CURRENT_SOURCE_DIR} -e third_party)
   endif()
 endif()
