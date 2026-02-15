@@ -1,3 +1,3 @@
 ignore:
-  - test/*
-  - third_party/*
+  - test/**
+  - third_party/**
