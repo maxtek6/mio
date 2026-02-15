@@ -16,12 +16,19 @@ configure_file(
   COPYONLY
 )
 
+set(COVER_TARGETS)
+
 foreach(src IN LISTS mio_test_sources)
   get_filename_component(exe ${src} NAME_WE)
   add_executable(${exe} ${src})
   target_include_directories(${exe} PRIVATE ${prefix})
   target_include_directories(${exe} PRIVATE ${CMAKE_SOURCE_DIR}/third_party)
   target_link_libraries(${exe} PRIVATE mio::mio)
+  if(mio.cover and NOT(WIN32))
+    target_compile_options(${exe} PRIVATE -fprofile-arcs -ftest-coverage -g -O0)
+    target_link_libraries(${exe} PRIVATE gcov "--coverage")
+    list(APPEND COVER_TARGETS ${exe})
+  endif()
   add_test(NAME ${exe} COMMAND ${exe})
 endforeach()
 
@@ -52,4 +59,17 @@ if(mio.benchmark)
     target_include_directories(${exe} PRIVATE ${prefix})
     target_link_libraries(${exe} PRIVATE mio::mio)
   endforeach()
+endif()
+
+if(mio.cover)
+  if(WIN32)
+    message(STATUS "Skipping coverage for Windows")
+  else()
+    add_custom_target(
+      cover
+      DEPENDS ${COVER_TARGETS})
+    add_custom_command(
+      TARGET cover
+      COMMAND gcovr -r ${CMAKE_CURRENT_SOURCE_DIR}/.. -e ${CMAKE_CURRENT_SOURCE_DIR})
+  endif()
 endif()

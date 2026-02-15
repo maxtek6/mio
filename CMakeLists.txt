@@ -62,6 +62,9 @@ CMAKE_DEPENDENT_OPTION(mio.tests
   "Build the mio tests and integrate with ctest"
    ON "BUILD_TESTING; NOT subproject" OFF)
 
+CMAKE_DEPENDENT_OPTION(mio.cover
+  "Build the mio tests with code coverage"
+   ON "BUILD_TESTING; NOT subproject" OFF)
 
 #
 # The `mio.benchmark` options only appear as cmake-gui and ccmake options iff
