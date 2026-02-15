@@ -1,6 +1,17 @@
+<!-- omit in toc -->
 # mio
 
-![status](https://github.com/maxtek6/mio/actions/workflows/test.yml/badge.svg)
+[![MIO Test Pipeline](https://github.com/wissem01chiha/mio/actions/workflows/test.yml/badge.svg)](https://github.com/wissem01chiha/mio/actions/workflows/test.yml)
+[![MIO Docs Pipeline](https://github.com/wissem01chiha/mio/actions/workflows/doc.yml/badge.svg)](https://github.com/wissem01chiha/mio/actions/workflows/doc.yml)
+
+- [Why?](#why)
+  - [How to create a mapping](#how-to-create-a-mapping)
+  - [Example](#example)
+  - [Single Header File](#single-header-file)
+- [CMake](#cmake)
+  - [Testing](#testing)
+  - [Installation](#installation)
+  - [Subproject Composition](#subproject-composition)
 
 This is a fork of the original [repo](https://github.com/vimpunk/mio), which is not actively maintained.
 
@@ -10,7 +21,8 @@ mio has been created with the goal to be easily includable (i.e. no dependencies
 
 Please feel free to open an issue, I'll try to address any concerns as best I can.
 
-### Why?
+## Why?
+
 Because memory mapping is the best thing since sliced bread!
 
 More seriously, the primary motivation for writing this library instead of using Boost.Iostreams, was the lack of support for establishing a memory mapping with an already open file handle/descriptor. This is possible with mio.
@@ -21,7 +33,7 @@ Albeit a minor nitpick, Boost.Iostreams implements memory mapped file IO with a 
 In mio, there are two classes to cover the two use-cases: one that is move-only (basically a zero-cost abstraction over the system specific mmapping functions), and the other that acts just like its Boost.Iostreams counterpart, with shared semantics.
 
 ### How to create a mapping
-NOTE: the file must exist before creating a mapping.
+>> Note :  the file must exist before creating a mapping.
 
 There are three ways to map a file into memory:
 
@@ -55,10 +67,11 @@ or:
 ```c++
 mmap.map(path, error);
 ```
-**NOTE:** The constructors **require** exceptions to be enabled. If you prefer
+>> **Note:** The constructors **require** exceptions to be enabled. If you prefer
 to build your projects with `-fno-exceptions`, you can still use the other ways.
 
 Moreover, in each case, you can provide either some string type for the file's path, or you can use an existing, valid file handle.
+
 ```c++
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -83,12 +96,8 @@ for functions where character strings are expected (e.g. path parameters).
 ### Example
 
 ```c++
-#include <mio/mmap.hpp>
-// #include <mio/mio.hpp> if using single header
-#include <system_error> // for std::error_code
-#include <cstdio> // for std::printf
+#include "mio.hpp"
 #include <cassert>
-#include <algorithm>
 #include <fstream>
 
 int handle_error(const std::error_code& error);
@@ -189,8 +198,10 @@ using mmap_sink = mio::basic_mmap_sink<std::byte>;
 Though generally not needed, since mio maps users requested offsets to page boundaries, you can query the underlying system's page allocation granularity by invoking `mio::page_size()`, which is located in `mio/page.hpp`.
 
 ### Single Header File 
+
 Mio can be added to your project as a single header file simply by including `\single_include\mio\mio.hpp`. Single header files can be regenerated at any time by running the `amalgamate.py` script within `\third_party`.  
-```
+
+```shell
 python amalgamate.py -c config.json -s ../include
 ```
 
@@ -206,7 +217,7 @@ CMake supports a number of backends for compilation and linking.
 
 To use a static configuration build tool, such as GNU Make or Ninja:
 
-```sh
+```shell
 cd <mio source directory>
 mkdir build
 cd build
@@ -224,7 +235,7 @@ cmake -D CMAKE_BUILD_TYPE=<Debug | Release> \
 
 To use a dynamic configuration build tool, such as Visual Studio or Xcode:
 
-```sh
+```shell
 cd <mio source directory>
 mkdir build
 cd build

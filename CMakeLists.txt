@@ -18,7 +18,14 @@ else()
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
 
-project(mio VERSION 1.1.0 LANGUAGES C CXX)
+project(
+  mio
+  VERSION 1.1.0
+  DESCRIPTION "A lightweight C++ library for memory-mapped file I/O"
+  HOMEPAGE_URL "https://github.com/maxtek6/mio"
+  LANGUAGES C CXX
+)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(CMakeDependentOption)
 include(CMakePackageConfigHelpers)
@@ -55,6 +62,36 @@ CMAKE_DEPENDENT_OPTION(mio.tests
   "Build the mio tests and integrate with ctest"
    ON "BUILD_TESTING; NOT subproject" OFF)
 
+
+#
+# The `mio.benchmark` options only appear as cmake-gui and ccmake options iff
+# mio is the highest level project. In the case that mio is a subproject, these
+# options are hidden from the user interface and set to `OFF`
+#
+CMAKE_DEPENDENT_OPTION(mio.benchmark
+  "Build the mio benchmarking suite"
+  ON "BUILD_TESTING; NOT subproject" OFF)
+
+
+#
+# The `mio.docs` only appear as cmake-gui and ccmake options if 
+# mio is the highest level project. In the case that mio is a subproject, these
+# options are hidden from the user interface and set to `OFF`
+#
+CMAKE_DEPENDENT_OPTION(mio.docs
+  "Build the mio doxygen documentation"
+   OFF "NOT subproject" OFF)
+mark_as_advanced(mio.docs)
+
+#
+# The `mio.examples` only appear as cmake-gui and ccmake options if 
+# mio is the highest level project. In the case that mio is a subproject, these
+# options are hidden from the user interface and set to `OFF`
+#
+CMAKE_DEPENDENT_OPTION(mio.examples
+  "Build the mio examples scripts"
+   ON "NOT subproject" OFF)
+
 #
 # On Windows, so as to be a "good citizen", mio offers two mechanisms to control
 # the imported surface area of the Windows API. The default `mio` target sets
@@ -86,6 +123,7 @@ CMAKE_DEPENDENT_OPTION(mio.installation
   "Include mio in the install set"
   "${INSTALL_SUBPROJECTS}" "subproject" ON)
 mark_as_advanced(mio.installation)
+
 
 #
 # mio has no compiled components. As such, we declare it as an `INTERFACE`
@@ -143,13 +181,43 @@ add_library(mio-headers INTERFACE)
 add_library(mio::mio-headers ALIAS mio-headers)
 target_link_libraries(mio-headers INTERFACE mio)
 
-add_subdirectory(include/mio)
+#
+# While not strictly necessary to specify header files as target sources,
+# doing so populates these files in the source listing when CMake is used
+# to generate XCode and Visual Studio projects.
+#
+target_sources(mio-headers INTERFACE
+  "${prefix}/mio/mmap.hpp"
+  "${prefix}/mio/page.hpp"
+  "${prefix}/mio/shared_mmap.hpp"
+  "${prefix}/mio/detail/mmap.ipp"
+  "${prefix}/mio/detail/string_util.hpp"
+)
 
 if(mio.tests)
   add_subdirectory(test)
 endif()
+ 
+if(mio.docs)
+  add_subdirectory(docs)
+endif()
+
+if(mio.examples)
+  add_subdirectory(example)
+endif()
 
 if(mio.installation)
+
+  #
+  # Generate package config '*.pc' file from vendored template
+  # for mio librray 
+  #
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc
+    @ONLY
+  )
+
   #
   # Non-testing header files (preserving relative paths) are installed to the
   # `include` subdirectory of the `$INSTALL_DIR/${CMAKE_INSTALL_PREFIX}`
@@ -158,6 +226,11 @@ if(mio.installation)
   install(DIRECTORY include/
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
     FILES_MATCHING PATTERN "*.*pp")
+
+  install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
+  )
 
   #
   # As a header-only library, there are no target components to be installed

@@ -19,7 +19,7 @@
  */
 
 /*
- * Copyright 2025 Maxtek Consulting
+ * Copyright 2026 Maxtek Consulting
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,8 +40,8 @@
  * SOFTWARE.
  */
 
-#ifndef MIO_MMAP_HEADER
-#define MIO_MMAP_HEADER
+#ifndef MIO_MMAP_HPP
+#define MIO_MMAP_HPP
 
 #include "mio/page.hpp"
 
@@ -51,19 +51,22 @@
 #include <cstdint>
 
 #ifdef _WIN32
-# ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-# endif // WIN32_LEAN_AND_MEAN
-# include <windows.h>
-#else // ifdef _WIN32
-# define INVALID_HANDLE_VALUE -1
-#endif // ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
+#define INVALID_HANDLE_VALUE -1
+#endif
 
 namespace mio {
 
 // This value may be provided as the `length` parameter to the constructor or
 // `map`, in which case a memory mapping of the entire file is created.
-enum { map_entire_file = 0 };
+enum
+{
+    map_entire_file = 0
+};
 
 #ifdef _WIN32
 using file_handle_type = HANDLE;
@@ -75,22 +78,22 @@ using file_handle_type = int;
 // determine whether `basic_mmap::file_handle` is valid, for example.
 const static file_handle_type invalid_handle = INVALID_HANDLE_VALUE;
 
-template<access_mode AccessMode, typename ByteT>
+template <access_mode AccessMode, typename ByteT>
 struct basic_mmap
 {
-    using value_type = ByteT;
-    using size_type = size_t;
-    using reference = value_type&;
-    using const_reference = const value_type&;
-    using pointer = value_type*;
-    using const_pointer = const value_type*;
-    using difference_type = std::ptrdiff_t;
-    using iterator = pointer;
-    using const_iterator = const_pointer;
-    using reverse_iterator = std::reverse_iterator<iterator>;
+    using value_type             = ByteT;
+    using size_type              = size_t;
+    using reference              = value_type&;
+    using const_reference        = const value_type&;
+    using pointer                = value_type*;
+    using const_pointer          = const value_type*;
+    using difference_type        = std::ptrdiff_t;
+    using iterator               = pointer;
+    using const_iterator         = const_pointer;
+    using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-    using iterator_category = std::random_access_iterator_tag;
-    using handle_type = file_handle_type;
+    using iterator_category      = std::random_access_iterator_tag;
+    using handle_type            = file_handle_type;
 
     static_assert(sizeof(ByteT) == sizeof(char), "ByteT must be the same size as char.");
 
@@ -100,7 +103,7 @@ private:
 
     // Length--in bytes--requested by user (which may not be the length of the
     // full mapping) and the length of the full mapping.
-    size_type length_ = 0;
+    size_type length_        = 0;
     size_type mapped_length_ = 0;
 
     // Letting user map a file using both an existing file handle and a path
@@ -127,7 +130,8 @@ public:
      * any operation that attempts to access nonexistent underlying data will
      * result in undefined behaviour/segmentation faults.
      */
-    basic_mmap() = default;
+    basic_mmap()
+            : is_handle_internal_(true) {};
 
 #ifdef __cpp_exceptions
     /**
@@ -135,12 +139,14 @@ public:
      * while establishing the mapping is wrapped in a `std::system_error` and is
      * thrown.
      */
-    template<typename String>
-    basic_mmap(const String& path, const size_type offset = 0, const size_type length = map_entire_file)
-    {
+    template <typename String>
+    explicit basic_mmap(const String& path, const size_type& offset = 0,
+                        const size_type& length = map_entire_file) {
         std::error_code error;
         map(path, offset, length, error);
-        if(error) { throw std::system_error(error); }
+        if(error) {
+            throw std::system_error(error);
+        }
     }
 
     /**
@@ -148,11 +154,13 @@ public:
      * while establishing the mapping is wrapped in a `std::system_error` and is
      * thrown.
      */
-    basic_mmap(const handle_type handle, const size_type offset = 0, const size_type length = map_entire_file)
-    {
+    explicit basic_mmap(const handle_type& handle, const size_type& offset = 0,
+                        const size_type& length = map_entire_file) {
         std::error_code error;
         map(handle, offset, length, error);
-        if(error) { throw std::system_error(error); }
+        if(error) {
+            throw std::system_error(error);
+        }
     }
 #endif // __cpp_exceptions
 
@@ -203,29 +211,28 @@ public:
     size_type mapped_length() const noexcept { return mapped_length_; }
 
     /** Returns the offset relative to the start of the mapping. */
-    size_type mapping_offset() const noexcept
-    {
-        return mapped_length_ - length_;
-    }
+    size_type mapping_offset() const noexcept { return mapped_length_ - length_; }
 
     /**
      * Returns a pointer to the first requested byte, or `nullptr` if no memory mapping
      * exists.
      */
-    template<
-        access_mode A = AccessMode,
-        typename = typename std::enable_if<A == access_mode::write>::type
-    > pointer data() noexcept { return data_; }
+    template <access_mode A = AccessMode,
+              typename      = typename std::enable_if<A == access_mode::write>::type>
+    pointer data() noexcept {
+        return data_;
+    }
     const_pointer data() const noexcept { return data_; }
 
     /**
      * Returns an iterator to the first requested byte, if a valid memory mapping
      * exists, otherwise this function call is undefined behaviour.
      */
-    template<
-        access_mode A = AccessMode,
-        typename = typename std::enable_if<A == access_mode::write>::type
-    > iterator begin() noexcept { return data(); }
+    template <access_mode A = AccessMode,
+              typename      = typename std::enable_if<A == access_mode::write>::type>
+    iterator begin() noexcept {
+        return data();
+    }
     const_iterator begin() const noexcept { return data(); }
     const_iterator cbegin() const noexcept { return data(); }
 
@@ -233,10 +240,11 @@ public:
      * Returns an iterator one past the last requested byte, if a valid memory mapping
      * exists, otherwise this function call is undefined behaviour.
      */
-    template<
-        access_mode A = AccessMode,
-        typename = typename std::enable_if<A == access_mode::write>::type
-    > iterator end() noexcept { return data() + length(); }
+    template <access_mode A = AccessMode,
+              typename      = typename std::enable_if<A == access_mode::write>::type>
+    iterator end() noexcept {
+        return data() + length();
+    }
     const_iterator end() const noexcept { return data() + length(); }
     const_iterator cend() const noexcept { return data() + length(); }
 
@@ -245,35 +253,33 @@ public:
      * memory mapping exists, otherwise this function call is undefined
      * behaviour.
      */
-    template<
-        access_mode A = AccessMode,
-        typename = typename std::enable_if<A == access_mode::write>::type
-    > reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
-    const_reverse_iterator rbegin() const noexcept
-    { return const_reverse_iterator(end()); }
-    const_reverse_iterator crbegin() const noexcept
-    { return const_reverse_iterator(end()); }
+    template <access_mode A = AccessMode,
+              typename      = typename std::enable_if<A == access_mode::write>::type>
+    reverse_iterator rbegin() noexcept {
+        return reverse_iterator(end());
+    }
+    const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+    const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(end()); }
 
     /**
      * Returns a reverse iterator past the first mapped byte, if a valid memory
      * mapping exists, otherwise this function call is undefined behaviour.
      */
-    template<
-        access_mode A = AccessMode,
-        typename = typename std::enable_if<A == access_mode::write>::type
-    > reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
-    const_reverse_iterator rend() const noexcept
-    { return const_reverse_iterator(begin()); }
-    const_reverse_iterator crend() const noexcept
-    { return const_reverse_iterator(begin()); }
+    template <access_mode A = AccessMode,
+              typename      = typename std::enable_if<A == access_mode::write>::type>
+    reverse_iterator rend() noexcept {
+        return reverse_iterator(begin());
+    }
+    const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+    const_reverse_iterator crend() const noexcept { return const_reverse_iterator(begin()); }
 
     /**
      * Returns a reference to the `i`th byte from the first requested byte (as returned
      * by `data`). If this is invoked when no valid memory mapping has been created
      * prior to this call, undefined behaviour ensues.
      */
-    reference operator[](const size_type i) noexcept { return data_[i]; }
-    const_reference operator[](const size_type i) const noexcept { return data_[i]; }
+    reference       operator[](const size_type& i) noexcept { return data_[i]; }
+    const_reference operator[](const size_type& i) const noexcept { return data_[i]; }
 
     /**
      * Establishes a memory mapping with AccessMode. If the mapping is unsuccesful, the
@@ -295,9 +301,9 @@ public:
      * `length` is the number of bytes to map. It may be `map_entire_file`, in which
      * case a mapping of the entire file is created.
      */
-    template<typename String>
-    void map(const String& path, const size_type offset,
-            const size_type length, std::error_code& error);
+    template <typename String>
+    void map(const String& path, const size_type& offset, const size_type& length,
+             std::error_code& error);
 
     /**
      * Establishes a memory mapping with AccessMode. If the mapping is unsuccesful, the
@@ -311,9 +317,8 @@ public:
      * 
      * The entire file is mapped.
      */
-    template<typename String>
-    void map(const String& path, std::error_code& error)
-    {
+    template <typename String>
+    void map(const String& path, std::error_code& error) {
         map(path, 0, map_entire_file, error);
     }
 
@@ -336,8 +341,8 @@ public:
      * `length` is the number of bytes to map. It may be `map_entire_file`, in which
      * case a mapping of the entire file is created.
      */
-    void map(const handle_type handle, const size_type offset,
-            const size_type length, std::error_code& error);
+    void map(const handle_type& handle, const size_type& offset, const size_type& length,
+             std::error_code& error);
 
     /**
      * Establishes a memory mapping with AccessMode. If the mapping is
@@ -350,8 +355,7 @@ public:
      * 
      * The entire file is mapped.
      */
-    void map(const handle_type handle, std::error_code& error)
-    {
+    void map(const handle_type& handle, std::error_code& error) {
         map(handle, 0, map_entire_file, error);
     }
 
@@ -369,9 +373,8 @@ public:
     void swap(basic_mmap& other);
 
     /** Flushes the memory mapped page to disk. Errors are reported via `error`. */
-    template<access_mode A = AccessMode>
-    typename std::enable_if<A == access_mode::write, void>::type
-    sync(std::error_code& error);
+    template <access_mode A = AccessMode>
+    typename std::enable_if<A == access_mode::write, void>::type sync(std::error_code& error);
 
     /**
      * All operators compare the address of the first byte and size of the two mapped
@@ -379,16 +382,13 @@ public:
      */
 
 private:
-    template<
-        access_mode A = AccessMode,
-        typename = typename std::enable_if<A == access_mode::write>::type
-    > pointer get_mapping_start() noexcept
-    {
+    template <access_mode A = AccessMode,
+              typename      = typename std::enable_if<A == access_mode::write>::type>
+    pointer get_mapping_start() noexcept {
         return !data() ? nullptr : data() - mapping_offset();
     }
 
-    const_pointer get_mapping_start() const noexcept
-    {
+    const_pointer get_mapping_start() const noexcept {
         return !data() ? nullptr : data() - mapping_offset();
     }
 
@@ -397,71 +397,63 @@ private:
      * if it's `read`, but since the destructor cannot be templated, we need to
      * do SFINAE in a dedicated function, where one syncs and the other is a noop.
      */
-    template<access_mode A = AccessMode>
+
+    template <access_mode A = AccessMode>
     typename std::enable_if<A == access_mode::write, void>::type
-    conditional_sync();
-    template<access_mode A = AccessMode>
-    typename std::enable_if<A == access_mode::read, void>::type conditional_sync();
+    conditional_sync(); // cppcheck-suppress functionStatic
+    template <access_mode A = AccessMode>
+    typename std::enable_if<A == access_mode::read, void>::type
+    conditional_sync(); // cppcheck-suppress functionStatic
 };
 
-template<access_mode AccessMode, typename ByteT>
-bool operator==(const basic_mmap<AccessMode, ByteT>& a,
-        const basic_mmap<AccessMode, ByteT>& b);
+template <access_mode AccessMode, typename ByteT>
+bool operator==(const basic_mmap<AccessMode, ByteT>& a, const basic_mmap<AccessMode, ByteT>& b);
 
-template<access_mode AccessMode, typename ByteT>
-bool operator!=(const basic_mmap<AccessMode, ByteT>& a,
-        const basic_mmap<AccessMode, ByteT>& b);
+template <access_mode AccessMode, typename ByteT>
+bool operator!=(const basic_mmap<AccessMode, ByteT>& a, const basic_mmap<AccessMode, ByteT>& b);
 
-template<access_mode AccessMode, typename ByteT>
-bool operator<(const basic_mmap<AccessMode, ByteT>& a,
-        const basic_mmap<AccessMode, ByteT>& b);
+template <access_mode AccessMode, typename ByteT>
+bool operator<(const basic_mmap<AccessMode, ByteT>& a, const basic_mmap<AccessMode, ByteT>& b);
 
-template<access_mode AccessMode, typename ByteT>
-bool operator<=(const basic_mmap<AccessMode, ByteT>& a,
-        const basic_mmap<AccessMode, ByteT>& b);
+template <access_mode AccessMode, typename ByteT>
+bool operator<=(const basic_mmap<AccessMode, ByteT>& a, const basic_mmap<AccessMode, ByteT>& b);
 
-template<access_mode AccessMode, typename ByteT>
-bool operator>(const basic_mmap<AccessMode, ByteT>& a,
-        const basic_mmap<AccessMode, ByteT>& b);
+template <access_mode AccessMode, typename ByteT>
+bool operator>(const basic_mmap<AccessMode, ByteT>& a, const basic_mmap<AccessMode, ByteT>& b);
 
-template<access_mode AccessMode, typename ByteT>
-bool operator>=(const basic_mmap<AccessMode, ByteT>& a,
-        const basic_mmap<AccessMode, ByteT>& b);
+template <access_mode AccessMode, typename ByteT>
+bool operator>=(const basic_mmap<AccessMode, ByteT>& a, const basic_mmap<AccessMode, ByteT>& b);
 
 /**
  * This is the basis for all read-only mmap objects and should be preferred over
  * directly using `basic_mmap`.
  */
-template<typename ByteT>
+template <typename ByteT>
 using basic_mmap_source = basic_mmap<access_mode::read, ByteT>;
 
 /**
  * This is the basis for all read-write mmap objects and should be preferred over
  * directly using `basic_mmap`.
  */
-template<typename ByteT>
+template <typename ByteT>
 using basic_mmap_sink = basic_mmap<access_mode::write, ByteT>;
 
 /**
  * These aliases cover the most common use cases, both representing a raw byte stream
  * (either with a char or an unsigned char/uint8_t).
  */
-using mmap_source = basic_mmap_source<char>;
+using mmap_source  = basic_mmap_source<char>;
 using ummap_source = basic_mmap_source<unsigned char>;
 
-using mmap_sink = basic_mmap_sink<char>;
+using mmap_sink  = basic_mmap_sink<char>;
 using ummap_sink = basic_mmap_sink<unsigned char>;
 
 /**
  * Convenience factory method that constructs a mapping for any `basic_mmap` or
  * `basic_mmap` type.
  */
-template<
-    typename MMap,
-    typename MappingToken
-> MMap make_mmap(const MappingToken& token,
-        int64_t offset, int64_t length, std::error_code& error)
-{
+template <typename MMap, typename MappingToken>
+MMap make_mmap(const MappingToken& token, int64_t offset, int64_t length, std::error_code& error) {
     MMap mmap;
     mmap.map(token, offset, length, error);
     return mmap;
@@ -474,16 +466,14 @@ template<
  * `std::filesystem::path`, `std::vector<char>`, or similar), or a
  * `mmap_source::handle_type`.
  */
-template<typename MappingToken>
+template <typename MappingToken>
 mmap_source make_mmap_source(const MappingToken& token, mmap_source::size_type offset,
-        mmap_source::size_type length, std::error_code& error)
-{
+                             mmap_source::size_type length, std::error_code& error) {
     return make_mmap<mmap_source>(token, offset, length, error);
 }
 
-template<typename MappingToken>
-mmap_source make_mmap_source(const MappingToken& token, std::error_code& error)
-{
+template <typename MappingToken>
+mmap_source make_mmap_source(const MappingToken& token, std::error_code& error) {
     return make_mmap_source(token, 0, map_entire_file, error);
 }
 
@@ -494,21 +484,19 @@ mmap_source make_mmap_source(const MappingToken& token, std::error_code& error)
  * `std::filesystem::path`, `std::vector<char>`, or similar), or a
  * `mmap_sink::handle_type`.
  */
-template<typename MappingToken>
+template <typename MappingToken>
 mmap_sink make_mmap_sink(const MappingToken& token, mmap_sink::size_type offset,
-        mmap_sink::size_type length, std::error_code& error)
-{
+                         mmap_sink::size_type length, std::error_code& error) {
     return make_mmap<mmap_sink>(token, offset, length, error);
 }
 
-template<typename MappingToken>
-mmap_sink make_mmap_sink(const MappingToken& token, std::error_code& error)
-{
+template <typename MappingToken>
+mmap_sink make_mmap_sink(const MappingToken& token, std::error_code& error) {
     return make_mmap_sink(token, 0, map_entire_file, error);
 }
 
-} // namespace mio
+}; // namespace mio
 
 #include "detail/mmap.ipp"
 
-#endif // MIO_MMAP_HEADER
+#endif // MIO_MMAP_HPP

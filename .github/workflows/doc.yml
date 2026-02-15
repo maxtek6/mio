@@ -1,0 +1,48 @@
+name: MIO Docs Pipeline
+on:
+  push:
+    branches: ["master"]
+
+env:
+  BUILD_TYPE: Debug
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Doxygen
+        uses: ssciwr/doxygen-install@v2
+
+      - name: Install Graphviz
+        run: sudo apt-get update && sudo apt-get install graphviz
+
+      - name: Configure 
+        run: |
+          cmake -S . -B build -Dmio.docs=ON -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+
+      - name: Build 
+        run: cmake --build build --target mio.docs
+
+      - name: Publish
+        uses: cpina/github-action-push-to-another-repository@v1.7.3
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+        with:
+          source-directory: 'build/html'
+          destination-github-username: 'maxtek6'
+          destination-repository-name: 'maxtek-github-react'
+          user-email: johnpatek2@gmail.com
+          target-branch: master
+          target-directory: public/docs/mio
+
