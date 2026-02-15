@@ -5,7 +5,6 @@
 ::
 :: Copyright 2026 Maxtek Consulting
 :: Copyright 2017 mandreyel (https://github.com/mandreyel/mio)
-:: Copyright 2026 Wissem Chiha
 ::
 :: Licensed under the MIT License. See the LICENSE file.
 :: -------------------------------------------------------------

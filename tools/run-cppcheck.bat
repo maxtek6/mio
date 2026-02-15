@@ -3,9 +3,8 @@
 ::
 :: This file is part of the mio library.
 ::
-:: Copyright 2026 Maxtek Consulting
+:: Copyright 2026 Maxtek Consulting (https://github.com/maxtek6/mio)
 :: Copyright 2017 mandreyel (https://github.com/mandreyel/mio)
-:: Copyright 2026 Wissem Chiha
 ::
 :: Licensed under the MIT License. See the LICENSE file.
 :: -------------------------------------------------------------

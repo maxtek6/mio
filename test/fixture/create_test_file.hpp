@@ -27,17 +27,19 @@
 #include <fstream>
 
 static std::string create_test_file(const std::string& path, size_t size) {
-    std::string buffer(size, 0);
-    char        v = 33;
-    for(auto& b : buffer) {
-        b = v;
+    std::string buffer;
+    buffer.reserve(size);
+
+    std::ofstream file(path);
+    char          v = 33;
+    for(size_t i = 0; i < size; ++i) {
+        buffer.push_back(v);
+        file.put(v);
         ++v;
         v %= 126;
         if(v == 0)
             v = 33;
     }
-    std::ofstream file(path);
-    file << buffer;
     return buffer;
 }
 

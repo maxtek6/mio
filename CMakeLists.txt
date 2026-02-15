@@ -22,7 +22,7 @@ project(
   mio
   VERSION 1.1.0
   DESCRIPTION "A lightweight C++ library for memory-mapped file I/O"
-  HOMEPAGE_URL "https://github.com/mandreyel/mio"
+  HOMEPAGE_URL "https://github.com/maxtek6/mio"
   LANGUAGES C CXX
 )
 
@@ -80,7 +80,7 @@ CMAKE_DEPENDENT_OPTION(mio.benchmark
 #
 CMAKE_DEPENDENT_OPTION(mio.docs
   "Build the mio doxygen documentation"
-   OFF "NOT subproject" OFF)
+   ON "NOT subproject" OFF)
 mark_as_advanced(mio.docs)
 
 #

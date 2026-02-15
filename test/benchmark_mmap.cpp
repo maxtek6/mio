@@ -15,8 +15,8 @@
 void benchmark_mmap_read(const std::string& path, size_t size) {
     mio::mmap_source mmap(path);
 
-    auto          start = std::chrono::high_resolution_clock::now();
-    volatile char c;
+    auto start = std::chrono::high_resolution_clock::now();
+    char c;
     for(size_t i = 0; i < mmap.size(); ++i) {
         c = mmap[i];
     }
@@ -49,7 +49,7 @@ void benchmark_mmap_write(const std::string& path, size_t size) {
 void benchmark_stream_read(const std::string& path, size_t size) {
     std::ifstream ifs(path, std::ios::binary);
     auto          start = std::chrono::high_resolution_clock::now();
-    volatile char c;
+    char          c;
     char          buffer;
     while(ifs.read(&buffer, 1)) {
         c = buffer;

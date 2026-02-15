@@ -22,29 +22,27 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Doxygen
-        run: |
-          sudo apt-get update 
-          sudo apt-get install -y doxygen
+        uses: ssciwr/doxygen-install@v2
 
       - name: Install Graphviz
-        run: sudo apt-get install -y graphviz
+        run: sudo apt-get update && sudo apt-get install graphviz
 
-      - name: Configure CMake
+      - name: Configure 
         run: |
           cmake -S . -B build -Dmio.docs=ON -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 
-      - name: Build Documents CMake Target
+      - name: Build 
         run: cmake --build build --target mio.docs
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Publish
+        uses: cpina/github-action-push-to-another-repository@v1.7.3
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
         with:
-          path: '${{github.workspace}}/build/html'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          source-directory: 'build/html'
+          destination-github-username: 'maxtek6'
+          destination-repository-name: 'maxtek-github-react'
+          user-email: johnpatek2@gmail.com
+          target-branch: master
+          target-directory: public/docs/mio
 

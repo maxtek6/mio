@@ -44,87 +44,53 @@
 #define MIO_STRING_UTIL_HPP
 
 #include <type_traits>
+#include <utility>
 
 namespace mio { namespace detail {
 
+#include <type_traits>
+#include <utility>
+
     template <typename S, typename C = typename std::decay<S>::type,
-              typename = decltype(std::declval<C>().data()),
-              typename = typename std::enable_if<
-                      std::is_same<typename C::value_type, char>::value
-#ifdef _WIN32
-                      || std::is_same<typename C::value_type, wchar_t>::value
-#endif
-                      >::type>
+              typename = decltype(std::declval<C>().data())>
     struct char_type_helper
     {
         using type = typename C::value_type;
     };
 
-    template <class T>
-    struct char_type
+    template <typename T, typename Enable = void>
+    struct char_type;
+
+    template <typename T>
+    struct char_type<T, typename std::void_t<typename char_type_helper<T>::type>>
     {
         using type = typename char_type_helper<T>::type;
     };
 
-    // TODO: can we avoid this brute force approach?
-    template <>
-    struct char_type<char*>
-    {
-        using type = char;
-    };
-
-    template <>
-    struct char_type<const char*>
-    {
-        using type = char;
-    };
-
-    template <size_t N>
-    struct char_type<char[N]>
-    {
-        using type = char;
-    };
-
-    template <size_t N>
-    struct char_type<const char[N]>
-    {
-        using type = char;
-    };
-
+    template <typename T>
+    struct char_type<
+            T, typename std::enable_if<
+                       std::is_same<typename std::remove_cv<typename std::remove_pointer<
+                                            typename std::remove_extent<T>::type>::type>::type,
+                                    char
 #ifdef _WIN32
-    template <>
-    struct char_type<wchar_t*>
+                                    >::value ||
+                       std::is_same<typename std::remove_cv<typename std::remove_pointer<
+                                            typename std::remove_extent<T>::type>::type>::type,
+                                    wchar_t
+#endif
+                                    >::value>::type>
     {
-        using type = wchar_t;
+        using type = typename std::remove_cv<
+                typename std::remove_pointer<typename std::remove_extent<T>::type>::type>::type;
     };
-
-    template <>
-    struct char_type<const wchar_t*>
-    {
-        using type = wchar_t;
-    };
-
-    template <size_t N>
-    struct char_type<wchar_t[N]>
-    {
-        using type = wchar_t;
-    };
-
-    template <size_t N>
-    struct char_type<const wchar_t[N]>
-    {
-        using type = wchar_t;
-    };
-#endif // _WIN32
 
     template <typename CharT, typename S>
     struct is_c_str_helper
     {
-        static constexpr bool value = std::is_same<
-                CharT*,
-                // TODO: I'm so sorry for this... Can this be made cleaner?
-                typename std::add_pointer<typename std::remove_cv<typename std::remove_pointer<
-                        typename std::decay<S>::type>::type>::type>::type>::value;
+        using Decayed = typename std::decay<S>::type;
+        using Base    = typename std::remove_cv<typename std::remove_pointer<Decayed>::type>::type;
+        static constexpr bool value = std::is_same<Base, CharT>::value;
     };
 
     template <typename S>
@@ -133,20 +99,12 @@ namespace mio { namespace detail {
         static constexpr bool value = is_c_str_helper<char, S>::value;
     };
 
-#ifdef _WIN32
-    template <typename S>
-    struct is_c_wstr
-    {
-        static constexpr bool value = is_c_str_helper<wchar_t, S>::value;
-    };
-#endif // _WIN32
-
     template <typename S>
     struct is_c_str_or_c_wstr
     {
-        static constexpr bool value = is_c_str<S>::value
+        static constexpr bool value = is_c_str_helper<char, S>::value
 #ifdef _WIN32
-                                      || is_c_wstr<S>::value
+                                      || is_c_str_helper<wchar_t, S>::value
 #endif
                 ;
     };
