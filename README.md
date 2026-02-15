@@ -325,12 +325,12 @@ The [use](https://services.github.com/on-demand/downloads/submodule-vs-subtree-c
 ```sh
 # via git submodule
 cd <my project's dependencies directory>
-git submodule add -b master https://github.com/mandreyel/mio.git
+git submodule add -b master https://github.com/maxtek6/mio.git
 
 # via git subtree
 cd <my project's root directory>
 git subtree add --prefix <path/to/dependencies>/mio       \
-    https://github.com/mandreyel/mio.git master --squash
+    https://github.com/maxtek6/mio.git master --squash
 ```
 
 Given a mio subdirectory in a project, simply add the following lines to your project's to add mio include directories to your target's include path.
