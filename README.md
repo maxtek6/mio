@@ -1,8 +1,8 @@
 <!-- omit in toc -->
 # mio
 
-[![MIO Test Pipeline](https://github.com/wissem01chiha/mio/actions/workflows/test.yml/badge.svg)](https://github.com/wissem01chiha/mio/actions/workflows/test.yml)
-[![MIO Docs Pipeline](https://github.com/wissem01chiha/mio/actions/workflows/doc.yml/badge.svg)](https://github.com/wissem01chiha/mio/actions/workflows/doc.yml)
+[![MIO Test Pipeline](https://github.com/maxtek6/mio/actions/workflows/test.yml/badge.svg)](https://github.com/maxtek6/mio/actions/workflows/test.yml)
+[![MIO Docs Pipeline](https://github.com/maxtek6/mio/actions/workflows/doc.yml/badge.svg)](https://github.com/maxtek6/mio/actions/workflows/doc.yml)
 
 - [Why?](#why)
   - [How to create a mapping](#how-to-create-a-mapping)
