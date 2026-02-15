@@ -3,6 +3,7 @@
 
 [![MIO Test Pipeline](https://github.com/maxtek6/mio/actions/workflows/test.yml/badge.svg)](https://github.com/maxtek6/mio/actions/workflows/test.yml)
 [![MIO Docs Pipeline](https://github.com/maxtek6/mio/actions/workflows/doc.yml/badge.svg)](https://github.com/maxtek6/mio/actions/workflows/doc.yml)
+[![codecov](https://codecov.io/gh/maxtek6/mio/branch/master/graph/badge.svg)](https://codecov.io/gh/maxtek6/mio)
 
 - [Why?](#why)
   - [How to create a mapping](#how-to-create-a-mapping)
