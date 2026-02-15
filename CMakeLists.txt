@@ -80,7 +80,7 @@ CMAKE_DEPENDENT_OPTION(mio.benchmark
 #
 CMAKE_DEPENDENT_OPTION(mio.docs
   "Build the mio doxygen documentation"
-   ON "NOT subproject" OFF)
+   OFF "NOT subproject" OFF)
 mark_as_advanced(mio.docs)
 
 #
