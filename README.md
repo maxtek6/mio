@@ -35,7 +35,9 @@ Albeit a minor nitpick, Boost.Iostreams implements memory mapped file IO with a 
 In mio, there are two classes to cover the two use-cases: one that is move-only (basically a zero-cost abstraction over the system specific mmapping functions), and the other that acts just like its Boost.Iostreams counterpart, with shared semantics.
 
 ### How to create a mapping
->> Note :  the file must exist before creating a mapping.
+
+> [!NOTE]
+> The file must exist before creating a mapping.
 
 There are three ways to map a file into memory:
 
