@@ -41,7 +41,7 @@ results.
 
 ## Installing amalgamate.py
 
-Requires Python 2.7+ and the [networkx](https://github.com/paulross/cpip) package.  
+Requires Python 2.7+ and the [networkx](https://networkx.org/en/) package.  
 
 ```shell
 pip install networkx 
