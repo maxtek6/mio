@@ -1,4 +1,3 @@
-
 # amalgamate.py - Amalgamate C source and header files
 
 Origin: https://bitbucket.org/erikedlund/amalgamate
@@ -42,11 +41,11 @@ results.
 
 ## Installing amalgamate.py
 
-Python v.2.7.0 or higher is required.
+Requires Python 2.7+ and the [networkx](https://github.com/paulross/cpip) package.  
 
-`amalgamate.py` can be tested and installed using the following commands:
-
-        ./test.sh && sudo -k cp ./amalgamate.py /usr/local/bin/
+```shell
+pip install networkx 
+```
 
 ## Using amalgamate.py
 
@@ -61,6 +60,10 @@ Python v.2.7.0 or higher is required.
  * The `-s, --source` option should specify the path to the source directory.
    This is useful for supporting separate source and build directories.
 
- * The `-p, --prologue` option should specify the path to a file which will be
-   added to the beginning of the amalgamation. It is optional.
 
+
+ from the root diretcory run :
+
+ ```shell
+ python ./third_party/amalgamate/amalgamate.py -v -c ./third_party/amalgamate/config.json -s ./include/ -t ./single_include/mio/mio.hpp
+  ```

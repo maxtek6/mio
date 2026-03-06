@@ -1,5 +1,25 @@
 #!/usr/bin/env python
 
+# Copyright (c) 2026 Maxtek Consulting
+
+#	Permission is hereby granted, free of charge, to any person obtaining a copy
+#	of this software and associated documentation files (the "Software"), to deal
+#	in the Software without restriction, including without limitation the rights
+#	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#	copies of the Software, and to permit persons to whom the Software is
+#	furnished to do so, subject to the following conditions:
+
+#	The above copyright notice and this permission notice shall be included in all
+#	copies or substantial portions of the Software.
+
+#	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#	SOFTWARE.
+
 # amalgamate.py - Amalgamate C source and header files.
 # Copyright (c) 2012, Erik Edlund <erik.edlund@32767.se>
 # 
@@ -28,268 +48,270 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import argparse
 import datetime
 import json
-import os
 import re
-import sys
+from pathlib import Path
+from typing import Iterable, Optional
 
-class Amalgamation(object):
-	
-	# Prepends self.source_path to file_path if needed.
-	def actual_path(self, file_path):
-		if not os.path.isabs(file_path):
-			file_path = os.path.join(self.source_path, file_path)
-		return file_path
-		
-	# Search included file_path in self.include_paths and
-	# in source_dir if specified.
-	def find_included_file(self, file_path, source_dir):
-		search_dirs = self.include_paths[:]
-		if source_dir:
-			search_dirs.insert(0, source_dir)
+import networkx as nx
 
-		for search_dir in search_dirs:
-			search_path = os.path.join(search_dir, file_path)
-			if os.path.isfile(self.actual_path(search_path)):
-				return search_path
-		return None		
-	
-	def __init__(self, args):
-		with open(args.config, 'r') as f:
-			config = json.loads(f.read())
-			for key in config:
-				setattr(self, key, config[key])
-			
-			self.verbose = args.verbose == "yes"
-			self.prologue = args.prologue
-			self.source_path = args.source_path
-			self.included_files = []
-	
-	# Generate the amalgamation and write it to the target file.
-	def generate(self):
-		amalgamation = ""
-		
-		if self.prologue:
-			with open(self.prologue, 'r') as f:
-				amalgamation += datetime.datetime.now().strftime(f.read())
-		
-		if self.verbose:
-			print("Config:")
-			print(" target        = {0}".format(self.target))
-			print(" working_dir   = {0}".format(os.getcwd()))
-			print(" include_paths = {0}".format(self.include_paths))
-		print("Creating amalgamation:")
-		for file_path in self.sources:
-			# Do not check the include paths while processing the source
-			# list, all given source paths must be correct.
-			actual_path = self.actual_path(file_path)
-			print(" - processing \"{0}\"".format(file_path))
-			t = TranslationUnit(file_path, self, True)
-			amalgamation += t.content
-		
-		with open(self.target, 'w') as f:
-			f.write(amalgamation)
-		
-		print("...done!\n")
-		if self.verbose:
-			print("Files processed: {0}".format(self.sources))
-			print("Files included: {0}".format(self.included_files))
-		print("")
 
-class TranslationUnit(object):
-	
-	# // C++ comment.
-	cpp_comment_pattern = re.compile(r"//.*?\n")
-	
-	# /* C comment. */
-	c_comment_pattern = re.compile(r"/\*.*?\*/", re.S)
-	
-	# "complex \"stri\\\ng\" value".
-	string_pattern = re.compile("[^']" r'".*?(?<=[^\\])"', re.S)
-	
-	# Handle simple include directives. Support for advanced
-	# directives where macros and defines needs to expanded is
-	# not a concern right now.
-	include_pattern = re.compile(
-		r'#\s*include\s+(<|")(?P<path>.*?)("|>)', re.S)
+class Amalgamate:
+    """
+    Amalgamate C/C++ source and header files.
+    """
+    def __init__(
+        self,
+        source_path: Path,
+        target_path: Path,
+        *,
+        version_path: Optional[Path] = None,
+        license_path: Optional[Path] = None,
+        ignore_files: Optional[Iterable[str]] = None,
+        project_name: Optional[str],
+        project_description : Optional[str],
+        verbose: bool = False,
+    ) -> None:
+        # Note : All paths are given relativly to the project root directory 
+        # (where the main CMakeLists.txt located on user machine)
+        self.verbose = verbose
+        self.source_path = Path(source_path)
+        self.target_path = Path(target_path)
+        self.version_path = Path(version_path) if version_path else None
+        self.license_path = Path(license_path) if license_path else None
+        # list of includes/source code files to be ignored from amalgamate 
+        self.ignore_files = list(ignore_files) if ignore_files else []
+        # full path to Amalgamate class script in third_party directory 
+        self.script_directory = Path(__file__).resolve().parent
+        self.root_directroy = self.script_directory.parent.parent
+        # project metadata 
+        self.project_name = project_name
+        self.project_description = project_description
+        # misc
+        self.file_pattern = ["*.hpp","*.h","*.hh","*.hxx", "*.ipp"]
+        self.include_pattern = re.compile(r'^\s*#\s*include\s*["<]([^">]+)[">]', re.ASCII)
 
-	# #pragma once
-	pragma_once_pattern = re.compile(r'#\s*pragma\s+once', re.S)
-	
-	# Search for pattern in self.content, add the match to
-	# contexts if found and update the index accordingly.
-	def _search_content(self, index, pattern, contexts):
-		match = pattern.search(self.content, index)
-		if match:
-			contexts.append(match)
-			return match.end()
-		return index + 2
-	
-	# Return all the skippable contexts, i.e., comments and strings
-	def _find_skippable_contexts(self):
-		# Find contexts in the content in which a found include
-		# directive should not be processed.
-		skippable_contexts = []
-		
-		# Walk through the content char by char, and try to grab
-		# skippable contexts using regular expressions when found.
-		i = 1
-		content_len = len(self.content)
-		while i < content_len:
-			j = i - 1
-			current = self.content[i]
-			previous = self.content[j]
-			
-			if current == '"':
-				# String value.
-				i = self._search_content(j, self.string_pattern,
-					skippable_contexts)
-			elif current == '*' and previous == '/':
-				# C style comment.
-				i = self._search_content(j, self.c_comment_pattern,
-					skippable_contexts)
-			elif current == '/' and previous == '/':
-				# C++ style comment.
-				i = self._search_content(j, self.cpp_comment_pattern,
-					skippable_contexts)
-			else:
-				# Skip to the next char.
-				i += 1
-		
-		return skippable_contexts
-		
-	# Returns True if the match is within list of other matches
-	def _is_within(self, match, matches):
-		for m in matches:
-			if match.start() > m.start() and \
-					match.end() < m.end():
-				return True
-		return False
-	
-	# Removes pragma once from content
-	def _process_pragma_once(self):
-		content_len = len(self.content)
-		if content_len < len("#include <x>"):
-			return 0
-		
-		# Find contexts in the content in which a found include
-		# directive should not be processed.
-		skippable_contexts = self._find_skippable_contexts()
+        if not self.source_path.exists() or not self.source_path.is_dir():
+            raise ValueError(f"source_path is not a directory: {self.source_path}")
 
-		pragmas = []
-		pragma_once_match = self.pragma_once_pattern.search(self.content)
-		while pragma_once_match:
-			if not self._is_within(pragma_once_match, skippable_contexts):
-				pragmas.append(pragma_once_match)
-			
-			pragma_once_match = self.pragma_once_pattern.search(self.content,
-				pragma_once_match.end())
-		
-		# Handle all collected pragma once directives.
-		prev_end = 0
-		tmp_content = ''
-		for pragma_match in pragmas:
-			tmp_content += self.content[prev_end:pragma_match.start()]
-			prev_end = pragma_match.end()
-		tmp_content += self.content[prev_end:]
-		self.content = tmp_content
-	
-	# Include all trivial #include directives into self.content.
-	def _process_includes(self):
-		content_len = len(self.content)
-		if content_len < len("#include <x>"):
-			return 0
-		
-		# Find contexts in the content in which a found include
-		# directive should not be processed.
-		skippable_contexts = self._find_skippable_contexts()
-		
-		# Search for include directives in the content, collect those
-		# which should be included into the content.
-		includes = []
-		include_match = self.include_pattern.search(self.content)
-		while include_match:
-			if not self._is_within(include_match, skippable_contexts):
-				include_path = include_match.group("path")
-				search_same_dir = include_match.group(1) == '"'
-				found_included_path = self.amalgamation.find_included_file(
-					include_path, self.file_dir if search_same_dir else None)
-				if found_included_path:
-					includes.append((include_match, found_included_path))
-			
-			include_match = self.include_pattern.search(self.content,
-				include_match.end())
-		
-		# Handle all collected include directives.
-		prev_end = 0
-		tmp_content = ''
-		for include in includes:
-			include_match, found_included_path = include
-			tmp_content += self.content[prev_end:include_match.start()]
-			tmp_content += "// {0}\n".format(include_match.group(0))
-			if not found_included_path in self.amalgamation.included_files:
-				t = TranslationUnit(found_included_path, self.amalgamation, False)
-				tmp_content += t.content
-			prev_end = include_match.end()
-		tmp_content += self.content[prev_end:]
-		self.content = tmp_content
-		
-		return len(includes)
-		
-	# Make all content processing
-	def _process(self):
-		if not self.is_root:
-			self._process_pragma_once()
-		self._process_includes()
-	
-	def __init__(self, file_path, amalgamation, is_root):
-		self.file_path = file_path
-		self.file_dir = os.path.dirname(file_path)
-		self.amalgamation = amalgamation
-		self.is_root = is_root
-		
-		self.amalgamation.included_files.append(self.file_path)
-		
-		actual_path = self.amalgamation.actual_path(file_path)
-		if not os.path.isfile(actual_path):
-			raise IOError("File not found: \"{0}\"".format(file_path))
-		with open(actual_path, 'r') as f:
-			self.content = f.read()
-			self._process()
+        target_parent = self.target_path.parent
+        if target_parent and not target_parent.exists():
+            target_parent.mkdir(parents=True, exist_ok=True)
+
+    def generate_header(self) -> None:
+        
+        open(self.target_path, "w").close()  
+        self._write_notice()
+        self._write_timestamp()
+        self._write_license_notice()
+        self._write_header_guard_begin()
+        self._write_version_macros()
+
+        root_dir = (self.root_directroy / self.source_path).resolve()
+        G = self._build_include_graph(root_dir)
+        # for node, neighbors in G.adj.items():
+        #     print(node, "->", list(neighbors))
+        try:
+            order = list(nx.topological_sort(G))
+        except nx.NetworkXUnfeasible:
+            cycle = nx.find_cycle(G)
+            raise RuntimeError(f"[amalgamate] : cyclic include detected: {cycle}")
+        
+        print(f'[amalgamate] Starting  ...')
+        with open(self.target_path, "a", encoding="utf-8") as out:
+            for path in order:
+                if any(ig in str(path) for ig in self.ignore_files):
+                    if self.verbose:
+                        print(f"[amalgamate] skipping ignored file: {path}")
+                    continue
+
+                if self.verbose:
+                    print(f"[amalgamate] adding file: {path}")
+
+                try:
+                    text = path.read_text(encoding="utf-8")
+                except Exception as e:
+                    print(f"[amalgamate] ERROR reading {path}: {e}")
+                    continue
+                text = self._strip_header_guard_begin(text)
+                text = self._strip_header_guard_end(text)
+                
+                out.write(f"{text}")
+                out.write("\n\n")
+
+        if self.verbose:
+            print("[amalgamate] Generation finished.")
+        
+        self._write_header_guard_end()
+
+    def _write_notice(self) -> None:
+        with open(self.target_path, "a", encoding="utf-8") as f:
+            f.write("\n//===============================================================\n")
+            f.write("// AUTOGENERATED BY AMALGAMATE SCRIPT — DO NOT EDIT BY HAND!\n")
+            f.write("//===============================================================\n")
+
+    def _write_timestamp(self) -> None:
+        timestamp = datetime.datetime.now().isoformat()
+        with open(self.target_path, "a", encoding="utf-8") as f:
+            f.write(f"// Generated on {timestamp}\n\n")
+
+    def _write_version_macros(self) -> None:
+        # write library version marcos, from VERSION file 
+        if not self.version_path or not self.version_path.exists():
+            raise ValueError(f"version file does not exist: {self.version_path}")
+
+        version_str = self.version_path.read_text().strip()
+        major, minor, patch = version_str.split(".")
+
+        macro = self.project_name.upper() # type: ignore
+        with open(self.target_path, "a", encoding="utf-8") as f:
+            f.write(f"#define {macro}_VERSION_MAJOR {major}\n")
+            f.write(f"#define {macro}_VERSION_MINOR {minor}\n")
+            f.write(f"#define {macro}_VERSION_PATCH {patch}\n\n")
+
+    def _write_license_notice(self) -> None:
+        # write library license notice from LICENSE file
+        if not self.license_path or not self.license_path.exists():
+            raise ValueError(f"license file does not exist: {self.license_path}")
+        lic = self.license_path.read_text()
+        with open(self.target_path, "a", encoding="utf-8") as f:
+            f.write("/*\n")
+            f.write(lic)
+            f.write("\n*/\n\n")
+
+    def _write_header_guard_begin(self)->None:
+        # this function constructs the single header preprocessor, from 
+        # the project name 
+        macro = self.project_name.upper() # type: ignore
+        with open(self.target_path, "a", encoding="utf-8") as f:
+            f.write(f"\n#ifndef {macro}_HPP\n")
+            f.write(f"#define {macro}_HPP\n\n")
+        return 
+    
+    def _write_header_guard_end(self)->None: 
+        # same as _write_header_guard_begin for closing 
+        macro = self.project_name.upper() # type: ignore
+        with open(self.target_path, "a", encoding="utf-8") as f:
+            f.write(f"#endif // {macro}_HPP ")
+        return 
+
+    def _build_include_graph(self, root_dir: Path):
+        # build a directed graph of file includes, where nodes are file 
+        # paths and edges represent #include relationships.
+        G = nx.DiGraph()
+        root_files = [
+            p
+            for pattern in self.file_pattern
+            for p in root_dir.glob(pattern)
+            if p.is_file()
+        ]
+        for src in root_files:
+            G.add_node(src)
+            includes = self._extract_includes(src)
+            for inc in includes:
+                inc_path = (root_dir / inc).resolve()
+                if inc_path.exists():
+                    G.add_edge(src, inc_path)
+                    # get the file sub-includes and add them to the graph
+                    child_includes = self._extract_includes(inc_path)
+                    if self.verbose:
+                        print(f'    Processing   :  {inc_path} ...')
+                        print(f'       ->        : {child_includes}')
+                    for child_inc in child_includes :
+                        child_inc_path = (root_dir / child_inc).resolve()
+                        if child_inc_path.exists():
+                            G.add_edge(inc_path, child_inc_path)
+                        else:
+                            print(f'    Unable to find include file {child_inc_path} - Skip')
+
+                else:
+                    if self.verbose:
+                        print(f"Unable resolve include file path {inc_path}")
+        return G
+
+    def _extract_includes(self, file_path: Path) -> list[str]:
+        # extract #include directives from a file and 
+        # return a list of included file paths.
+        includes = []
+        try:
+            text = file_path.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            return includes
+        for line in text.splitlines():
+            m = self.include_pattern.match(line)
+            if m:
+                includes.append(m.group(1))  
+        return includes
+
+
+    def _strip_header_guard_begin(self, text: str) -> str:
+        # remove the first header guard 
+        lines = text.splitlines()
+        n = len(lines)
+        i = 0
+        while i < n and not lines[i].lstrip().startswith("#ifndef"):
+            i += 1
+        if i == n:
+            return text
+        i += 1
+        while i < n and not lines[i].lstrip().startswith("#define"):
+            i += 1
+        if i < n and lines[i].lstrip().startswith("#define"):
+            i += 1  
+        while i < n and lines[i].strip() == "":
+            i += 1
+
+        return "\n".join(lines[i:])
+
+    def _strip_header_guard_end(self, text: str) -> str:
+        # remove the trailing #endif header guard
+        lines = text.splitlines()
+        i = len(lines) - 1
+
+        while i >= 0 and lines[i].strip() == "":
+            i -= 1
+        if i >= 0 and lines[i].lstrip().startswith("#endif"):
+            i -= 1
+        while i >= 0 and lines[i].strip() == "":
+            i -= 1
+
+        return "\n".join(lines[:i + 1]) + ("\n" if i >= 0 else "")
 
 def main():
-	description = "Amalgamate C source and header files."
-	usage = " ".join([
-		"amalgamate.py",
-		"[-v]",
-		"-c path/to/config.json",
-		"-s path/to/source/dir",
-		"[-p path/to/prologue.(c|h)]"
-	])
-	argsparser = argparse.ArgumentParser(
-		description=description, usage=usage)
-	
-	argsparser.add_argument("-v", "--verbose", dest="verbose",
-		choices=["yes", "no"], metavar="", help="be verbose")
-	
-	argsparser.add_argument("-c", "--config", dest="config",
-		required=True, metavar="", help="path to a JSON config file")
-	
-	argsparser.add_argument("-s", "--source", dest="source_path",
-		required=True, metavar="", help="source code path")
-	
-	argsparser.add_argument("-p", "--prologue", dest="prologue",
-		required=False, metavar="", help="path to a C prologue file")
-	
-	amalgamation = Amalgamation(argsparser.parse_args())
-	amalgamation.generate()
+    parser = argparse.ArgumentParser(
+        description="Amalgamate C/C++ source and header files"
+    )
+
+    parser.add_argument("-v", "--verbose", action="store_true", 
+                        help="enable verbose logging")
+    parser.add_argument("-c", "--config", required=False, help=
+                        "path to configuration file (eg config.json)")
+    parser.add_argument("-s", "--source", required=True, 
+                        help="path to project source directory")
+    parser.add_argument("-t", "--target", required=True, 
+                        help="path to target autogenerated header file")
+
+    args = parser.parse_args()
+
+    with open(args.config) as cfg:
+        config = json.load(cfg)
+
+    am = Amalgamate(
+        source_path=Path(args.source),
+        target_path=Path(args.target),
+        version_path=Path(config.get("version", "")) if config.get("version") else None,
+        license_path=Path(config.get("license", "")) if config.get("license") else None,
+        ignore_files=config.get("ignore", []),
+        project_name= str(config.get("name")),
+        project_description= config.get("description"),
+        verbose=args.verbose,
+    )
+
+    am.generate_header()
+
 
 if __name__ == "__main__":
-	main()
+    main()
 
