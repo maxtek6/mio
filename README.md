@@ -4,6 +4,7 @@
 [![MIO Test Pipeline](https://github.com/maxtek6/mio/actions/workflows/test.yml/badge.svg)](https://github.com/maxtek6/mio/actions/workflows/test.yml)
 [![MIO Docs Pipeline](https://github.com/maxtek6/mio/actions/workflows/doc.yml/badge.svg)](https://github.com/maxtek6/mio/actions/workflows/doc.yml)
 [![codecov](https://codecov.io/gh/maxtek6/mio/branch/master/graph/badge.svg)](https://codecov.io/gh/maxtek6/mio)
+[![CodeFactor](https://www.codefactor.io/repository/github/wissem01chiha/mio/badge)](https://www.codefactor.io/repository/github/wissem01chiha/mio)
 
 - [Why?](#why)
   - [How to create a mapping](#how-to-create-a-mapping)
@@ -34,7 +35,9 @@ Albeit a minor nitpick, Boost.Iostreams implements memory mapped file IO with a 
 In mio, there are two classes to cover the two use-cases: one that is move-only (basically a zero-cost abstraction over the system specific mmapping functions), and the other that acts just like its Boost.Iostreams counterpart, with shared semantics.
 
 ### How to create a mapping
->> Note :  the file must exist before creating a mapping.
+
+> [!NOTE]
+> The file must exist before creating a mapping.
 
 There are three ways to map a file into memory:
 
@@ -68,18 +71,14 @@ or:
 ```c++
 mmap.map(path, error);
 ```
->> **Note:** The constructors **require** exceptions to be enabled. If you prefer
+> [!NOTE]
+> The constructors **require** exceptions to be enabled. If you prefer
 to build your projects with `-fno-exceptions`, you can still use the other ways.
 
 Moreover, in each case, you can provide either some string type for the file's path, or you can use an existing, valid file handle.
 
 ```c++
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <mio/mmap.hpp>
-// #include <mio/mio.hpp> if using single header
-#include <algorithm>
+#include <mio/mio.hpp>
 
 int main()
 {
@@ -91,13 +90,14 @@ int main()
 ```
 However, mio does not check whether the provided file descriptor has the same access permissions as the desired mapping, so the mapping may fail. Such errors are reported via the `std::error_code` out parameter that is passed to the mapping function.
 
-**WINDOWS USERS**: This library *does* support the use of wide character types
-for functions where character strings are expected (e.g. path parameters).
+> [!NOTE]
+> **WINDOWS USERS**: This library *does* support the use of wide character types
+> for functions where character strings are expected (e.g. path parameters).
 
 ### Example
 
 ```c++
-#include "mio.hpp"
+#include <mio/mio.hpp>
 #include <cassert>
 #include <fstream>
 
@@ -173,7 +173,7 @@ void allocate_file(const std::string& path, const int size)
 
 `mio::basic_mmap` is move-only, but if multiple copies to the same mapping are needed, use `mio::basic_shared_mmap` which has `std::shared_ptr` semantics and has the same interface as `mio::basic_mmap`.
 ```c++
-#include <mio/shared_mmap.hpp>
+#include <mio/mio.hpp>
 
 mio::shared_mmap_source shared_mmap1("path", offset, size_to_map);
 mio::shared_mmap_source shared_mmap2(std::move(mmap1)); // or use operator=
@@ -200,10 +200,10 @@ Though generally not needed, since mio maps users requested offsets to page boun
 
 ### Single Header File 
 
-Mio can be added to your project as a single header file simply by including `\single_include\mio\mio.hpp`. Single header files can be regenerated at any time by running the `amalgamate.py` script within `\third_party`.  
+Mio can be added to your project as a single header file simply by including [mio.hpp](/single_include/mio/mio.hpp). Single header files can be regenerated at any time by running the [amalgamate.py](third_party/amalgamate/amalgamate.py) script within [\third_party](/third_party/) directory.
 
 ```shell
-python amalgamate.py -c config.json -s ../include
+ python ./third_party/amalgamate/amalgamate.py -v -c ./third_party/amalgamate/config.json -s ./include/ -t ./single_include/mio/mio.hpp
 ```
 
 ## CMake
@@ -309,8 +309,12 @@ This latter step allows downstream CMake projects to consume mio via `find_packa
 find_package( mio REQUIRED )
 target_link_libraries( MyTarget PUBLIC mio::mio )
 ```
-
-**WINDOWS USERS**: The `mio::mio` target `#define`s `WIN32_LEAN_AND_MEAN` and `NOMINMAX`. The former ensures the imported surface area of the Win API is minimal, and the latter disables Windows' `min` and `max` macros so they don't intefere with `std::min` and `std::max`. Because *mio* is a header only library, these defintions will leak into downstream CMake builds. If their presence is causing problems with your build then you can use the alternative `mio::mio_full_winapi` target, which adds none of these defintions.
+> [!NOTE]
+> **WINDOWS USERS**: The `mio::mio` target `#define`s `WIN32_LEAN_AND_MEAN` and
+> `NOMINMAX`. The former ensures the imported surface area of the Win API is  minimal, and the latter disables Windows' `min` and
+> `max` macros so they don't intefere with `std::min` and `std::max`. Because *mio* is a header only library, these defintions will
+> leak into downstream CMake builds. If their presence is causing problems with your build then you can use the alternative
+> `mio::mio_full_winapi` target, which adds none of these defintions.
 
 If mio was installed to a non-conventional location, it may be necessary for downstream projects to specify the mio installation root directory via either
 

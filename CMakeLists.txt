@@ -127,6 +127,19 @@ CMAKE_DEPENDENT_OPTION(mio.installation
   "${INSTALL_SUBPROJECTS}" "subproject" ON)
 mark_as_advanced(mio.installation)
 
+#
+# Enable compiling with AddressSanitizer for test sources.
+# This option is only available with Clang/GCC compilers.
+# MSVC does not support the -fsanitize=address flag.
+# On Windows, users must use clang-cl (LLVM frontend for MSVC)
+# and replace the flag with /fsanitize=address.
+# Note: AddressSanitizer support on Windows is limited in mio.
+#
+CMAKE_DEPENDENT_OPTION(
+  mio.asan "Enable AddressSanitizer"
+  ON "NOT subproject AND NOT WIN32" OFF
+)
+mark_as_advanced(mio.asan)
 
 #
 # mio has no compiled components. As such, we declare it as an `INTERFACE`

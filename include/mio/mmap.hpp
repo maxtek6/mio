@@ -497,6 +497,6 @@ mmap_sink make_mmap_sink(const MappingToken& token, std::error_code& error) {
 
 }; // namespace mio
 
-#include "detail/mmap.ipp"
+#include "mio/detail/mmap.ipp"
 
 #endif // MIO_MMAP_HPP
