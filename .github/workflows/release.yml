@@ -21,22 +21,9 @@ jobs:
           VERSION=$(cat VERSION)
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Check if tag exists
-        id: check_tag
-        continue-on-error: true
-        run: git rev-parse v${{ steps.version.outputs.VERSION }} >/dev/null 2>&1
-
-      - name: Create release tag
-        if: steps.check_tag.outcome == 'failure'
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git tag -a v${{ steps.version.outputs.VERSION }} -m "Release ${{ steps.version.outputs.VERSION }}"
-          git push origin v${{ steps.version.outputs.VERSION }}
-
       - name: Create tar archive
         run: |
-          tar -czf mio-${{ steps.version.outputs.VERSION }}.tar.gz \
+          tar -czf /tmp/mio-${{ steps.version.outputs.VERSION }}.tar.gz \
             --exclude=.git \
             --exclude=.github \
             --exclude=build \
@@ -45,27 +32,11 @@ jobs:
             --exclude=.clang-tidy \
             .
 
-      - name: Create GitHub Release
-        if: steps.check_tag.outcome == 'failure'
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Upload tar archive to release
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.version.outputs.VERSION }}
-          release_name: Release ${{ steps.version.outputs.VERSION }}
-          body: |
-            Release of MIO ${{ steps.version.outputs.VERSION }}
-          draft: false
-          prerelease: false
-
-      - name: Upload tar archive to release
-        if: steps.check_tag.outcome == 'failure'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./mio-${{ steps.version.outputs.VERSION }}.tar.gz
-          asset_name: mio-${{ steps.version.outputs.VERSION }}.tar.gz
-          asset_content_type: application/gzip
+          name: ${{ steps.version.outputs.VERSION }}
+          files: /tmp/mio-${{ steps.version.outputs.VERSION }}.tar.gz
