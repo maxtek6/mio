@@ -2,7 +2,6 @@ name: MIO Release Pipeline
 
 on:
   push:
-    branches: [ "master" ]
 
 permissions:
   contents: write
@@ -23,11 +22,15 @@ jobs:
 
       - name: Check if tag exists
         id: check_tag
-        continue-on-error: true
-        run: git rev-parse v${{ steps.version.outputs.VERSION }} >/dev/null 2>&1
+        run: |
+          if git tag -l v${{ steps.version.outputs.VERSION }} | grep -q v${{ steps.version.outputs.VERSION }}; then
+            echo "TAG_EXISTS=true" >> $GITHUB_OUTPUT
+          else
+            echo "TAG_EXISTS=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Create release tag
-        if: steps.check_tag.outcome == 'failure'
+        if: steps.check_tag.outputs.TAG_EXISTS == 'false'
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
@@ -36,7 +39,7 @@ jobs:
 
       - name: Create tar archive
         run: |
-          tar -czf mio-${{ steps.version.outputs.VERSION }}.tar.gz \
+          tar -czf /tmp/mio-${{ steps.version.outputs.VERSION }}.tar.gz \
             --exclude=.git \
             --exclude=.github \
             --exclude=build \
@@ -46,7 +49,7 @@ jobs:
             .
 
       - name: Create GitHub Release
-        if: steps.check_tag.outcome == 'failure'
+        if: steps.check_tag.outputs.TAG_EXISTS == 'false'
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -60,12 +63,12 @@ jobs:
           prerelease: false
 
       - name: Upload tar archive to release
-        if: steps.check_tag.outcome == 'failure'
+        if: steps.check_tag.outputs.TAG_EXISTS == 'false'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./mio-${{ steps.version.outputs.VERSION }}.tar.gz
+          asset_path: /tmp/mio-${{ steps.version.outputs.VERSION }}.tar.gz
           asset_name: mio-${{ steps.version.outputs.VERSION }}.tar.gz
           asset_content_type: application/gzip
