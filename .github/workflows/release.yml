@@ -2,6 +2,7 @@ name: MIO Release Pipeline
 
 on:
   push:
+    branches: [ "master" ]
 
 permissions:
   contents: write
@@ -37,5 +38,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.version.outputs.VERSION }}
-          name: mio-${{ steps.version.outputs.VERSION }}.tar.gz
+          name: ${{ steps.version.outputs.VERSION }}
           files: /tmp/mio-${{ steps.version.outputs.VERSION }}.tar.gz
