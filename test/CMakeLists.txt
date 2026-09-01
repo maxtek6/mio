@@ -2,6 +2,7 @@ set(mio_test_sources
   test_mmap.cpp
   test_page_size.cpp
   test_shared_mmap.cpp
+  test_advise.cpp
 )
 
 set(mio_benchmark_sources 
